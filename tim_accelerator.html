@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-transparent text-[var(--foreground)] antialiased p-0 m-0">
+  <div class="py-2 space-y-2.5 text-xs">
+    <!-- Top Controls & Live Hardware Accelerator Telemetry -->
+    <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[var(--card-border)]">
+      <div class="flex items-center gap-1.5">
+        <button data-m="N" class="mbtn px-2.5 py-1 rounded font-semibold border border-cyan-400 bg-cyan-500/20 text-[var(--foreground)]">Newtonian</button>
+        <button data-m="P" class="mbtn px-2.5 py-1 rounded font-semibold border border-[var(--card-border)] bg-[var(--card)] text-[var(--muted-foreground)]">Power-Law (n&lt;1)</button>
+        <button data-m="B" class="mbtn px-2.5 py-1 rounded font-semibold border border-[var(--card-border)] bg-[var(--card)] text-[var(--muted-foreground)]">Bingham (τ_y)</button>
+      </div>
+      <div class="flex items-center gap-3 font-mono tabular-nums">
+        <span>F₀: <input id="F0" type="range" min="100" max="900" step="25" value="400" class="w-20 align-middle accent-[var(--primary)]"> <b id="F0v">400 N</b></span>
+        <span>τ_y: <input id="ty" type="range" min="0" max="6000" step="200" value="3200" class="w-20 align-middle accent-[var(--primary)]"> <b id="tyv">3.2 kPa</b></span>
+        <button id="reset" class="px-2 py-1 rounded border border-[var(--card-border)] bg-[var(--card)] hover:opacity-80">↺ Re-Clamp</button>
+      </div>
+    </div>
+
+    <!-- Main Dual Canvas: Left = 2D Lubrication Cross-Section, Right = 3D Isometric CoWoS Accelerator + Top Die Footprint -->
+    <canvas id="sim" class="w-full rounded-lg border border-[var(--card-border)]" style="height:290px;display:block;"></canvas>
+
+    <!-- Bottom Live Telemetry Strip -->
+    <div class="grid grid-cols-5 gap-2 pt-1 font-mono tabular-nums text-xs">
+      <div class="p-1.5 rounded bg-[var(--card)] border border-[var(--card-border)]">
+        <div class="text-[var(--muted-foreground)]">Bondline h(t)</div>
+        <div id="rd_h" class="font-bold text-sm">–</div>
+      </div>
+      <div class="p-1.5 rounded bg-[var(--card)] border border-[var(--card-border)]">
+        <div class="text-[var(--muted-foreground)]">Die Coverage</div>
+        <div id="rd_cov" class="font-bold text-sm">–</div>
+      </div>
+      <div class="p-1.5 rounded bg-[var(--card)] border border-[var(--card-border)]">
+        <div class="text-[var(--muted-foreground)]">ΔT_TIM (700 W)</div>
+        <div id="rd_dT" class="font-bold text-sm">–</div>
+      </div>
+      <div class="p-1.5 rounded bg-[var(--card)] border border-[var(--card-border)]">
+        <div class="text-[var(--muted-foreground)]">GPU Clock / State</div>
+        <div id="rd_clk" class="font-bold text-sm">–</div>
+      </div>
+      <div class="p-1.5 rounded bg-[var(--card)] border border-[var(--card-border)]">
+        <div class="text-[var(--muted-foreground)]">Regime (ε, Re_sq)</div>
+        <div id="rd_reg" class="font-bold text-sm">–</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const PI = Math.PI, A_DIE = 814e-6, R_EQ = Math.sqrt(A_DIE / PI), V0 = 30e-9, H0 = 0.3e-3, MU = 100, N_PL = 0.45, K_TIM = 5, K_AIR = 0.026, Q = 700;
+const COL = { N: '#22d3ee', P: '#e879f9', B: '#fbbf24' };
+const RGB = { N: [34,211,238], P: [232,121,249], B: [251,191,36] };
+let sel = 'N', F0 = 400, TY = 3200, s = 0, last = performance.now();
+
+const Rof = h => Math.min(Math.sqrt(V0 / (PI * h)), R_EQ);
+function hAt(m, t) {
+  if (t <= 0) return H0;
+  if (m === 'N') {
+    const a = 8 * PI * F0 * Math.pow(H0, 4) / (3 * MU * V0 * V0);
+    return H0 * Math.pow(1 + a * t, -0.25);
+  }
+  if (m === 'P') {
+    const n = N_PL, K = MU * Math.pow(1000, 1 - n);
+    const Cn = Math.pow((2 * n + 1) / n, n);
+    const rate0 = Math.pow(F0 * (n + 3) / (2 * PI * K * Cn * Math.pow(V0 / PI, (n + 3) / 2)), 1 / n);
+    const p = (3 * n + 5) / (2 * n);
+    return Math.pow(Math.pow(H0, -p) + p * rate0 * t, -1 / p);
+  }
+  const hs = TY > 0 ? Math.pow(2 * TY * Math.pow(V0, 1.5) / (3 * Math.sqrt(PI) * F0), 0.4) : 0;
+  const hN = hAt('N', t);
+  return Math.sqrt(hN * hN + hs * hs);
+}
+
+const particles = Array.from({ length: 90 }, () => ({ x: Math.random() * 2 - 1, z: Math.random() }));
+
+function draw() {
+  const c = $('sim'), dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth, h = c.clientHeight;
+  if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) {
+    c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+  }
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const isLight = document.documentElement.classList.contains('light');
+  ctx.fillStyle = isLight ? '#0b1120' : '#060b18';
+  ctx.fillRect(0, 0, w, h);
+
+  const now = performance.now();
+  const t = s <= 0 ? 0 : 1e-3 * Math.pow(120 / 1e-3, s);
+  const ht = hAt(sel, t), R = Rof(ht);
+  const Ac = Math.min(PI * R * R, A_DIE), cov = Ac / A_DIE;
+  const dT = Q * ht / (K_TIM * Ac + K_AIR * (A_DIE - Ac));
+  const Tj = 45 + dT;
+  const clk = Tj > 85 ? Math.max(850, Math.round(1980 - (Tj - 85) * 18)) : 1980;
+  const hs = (sel === 'B' && TY > 0) ? Math.pow(2 * TY * Math.pow(V0, 1.5) / (3 * Math.sqrt(PI) * F0), 0.4) : 0;
+  const stalled = sel === 'B' && ht <= hs * 1.03;
+
+  // ---- LEFT HALF: 2D Lubrication Cross-Section ----
+  const wL = Math.floor(w * 0.54), cx = wL * 0.5, sx = (wL * 0.38) / R_EQ;
+  const subTop = h - 34, dieTop = subTop - 32;
+  const gp = 8 + 100 * Math.pow(ht / H0, 0.52);
+  const cpBot = dieTop - gp, cpTop = cpBot - 22, finTop = cpTop - 72;
+  const dieL = cx - R_EQ * sx, dieR = cx + R_EQ * sx, plL = 18, plR = wL - 18;
+
+  // CoWoS Interposer + Data Pulses
+  ctx.fillStyle = '#0f5132'; ctx.fillRect(plL, subTop, plR - plL, 18);
+  for (let i = 0; i < 8; i++) {
+    const bx = plL + ((now / 650 + i * 0.125) % 1) * (plR - plL - 10);
+    ctx.fillStyle = '#38bdf8'; ctx.fillRect(bx, subTop + 7, 8, 2.5);
+  }
+  // GPU Compute Die + Tensor Core SM Pulse Grid
+  ctx.fillStyle = '#1e293b'; ctx.fillRect(dieL, dieTop, dieR - dieL, subTop - dieTop);
+  for (let i = 0; i < 12; i++) {
+    const act = 0.5 + 0.5 * Math.sin(now / 170 + i * 1.5);
+    ctx.fillStyle = cov < 0.999 && (i < 2 || i > 9) ? 'rgba(255,71,87,0.75)' : `rgba(56,189,248,${0.15 + 0.35 * act})`;
+    ctx.fillRect(dieL + i * (dieR - dieL) / 12 + 1, dieTop + 4, (dieR - dieL) / 12 - 2, 10);
+  }
+  ctx.fillStyle = '#e2e8f0'; ctx.font = 'bold 10.5px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('700 W AI GPU Die (86 W/cm²)', cx, dieTop + 25);
+
+  // TIM Layer with Constitutive Velocity Profile Shading
+  const nx = 60, nz = 14;
+  for (let i = 0; i < nx; i++) {
+    const xa = -R + 2 * R * i / nx, xb = -R + 2 * R * (i + 1) / nx, rf = Math.abs((xa + xb) / 2) / R;
+    for (let j = 0; j < nz; j++) {
+      const zf = (j + 0.5) / nz, sZ = Math.abs(0.5 - zf) * 2;
+      let prof = 1 - sZ * sZ;
+      if (sel === 'P') prof = 1 - Math.pow(sZ, (N_PL + 1) / N_PL);
+      if (sel === 'B') { const pF = Math.min(0.85, hs / ht * 0.85); prof = sZ < pF ? 1 : 1 - Math.pow((sZ - pF) / (1 - pF), 2); }
+      const u = stalled ? 0.15 : rf * prof;
+      ctx.fillStyle = `rgba(${RGB[sel][0]},${RGB[sel][1]},${RGB[sel][2]},${0.25 + 0.72 * u})`;
+      ctx.fillRect(cx + xa * sx, dieTop - (j + 1) / nz * gp, (xb - xa) * sx + 0.6, gp / nz + 0.6);
+    }
+  }
+  if (sel === 'B' && TY > 0) {
+    const pH = gp * Math.min(0.42, 0.42 * Math.pow(hs / ht, 0.5));
+    ctx.fillStyle = 'rgba(255,255,255,0.22)'; ctx.strokeStyle = '#fff'; ctx.setLineDash([3, 3]);
+    ctx.fillRect(cx - R * sx, dieTop - gp / 2 - pH, 2 * R * sx, 2 * pH);
+    ctx.strokeRect(cx - R * sx, dieTop - gp / 2 - pH, 2 * R * sx, 2 * pH);
+    ctx.setLineDash([]);
+  }
+  // Advected filler particles
+  ctx.fillStyle = '#fff';
+  for (const p of particles) {
+    if (!stalled) p.x = ((p.x + 1 + 0.004 * Math.sign(p.x || 1)) % 2) - 1;
+    ctx.beginPath(); ctx.arc(cx + p.x * R * sx * 0.95, dieTop - (0.08 + 0.84 * p.z) * gp, 1.5, 0, 2 * PI); ctx.fill();
+  }
+
+  // Copper Cold Plate + Microchannel Fins
+  ctx.fillStyle = '#c2673a'; ctx.fillRect(plL, cpTop, plR - plL, cpBot - cpTop);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('Cu Microchannel Cold Plate', cx, cpTop + 14);
+  const nf = 11, pitch = (plR - plL) / nf;
+  for (let i = 0; i < nf; i++) {
+    const fx = plL + i * pitch + 2, fw = pitch - 4;
+    ctx.fillStyle = '#475569'; ctx.fillRect(fx, finTop, fw, cpTop - finTop);
+    const cy = cpTop - 6 - ((now / 400 + i * 0.19) % 1) * (cpTop - finTop - 12);
+    ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(fx + fw / 2, cy, 2, 0, 2 * PI); ctx.fill();
+  }
+
+  // Divider
+  ctx.strokeStyle = '#1e293b'; ctx.beginPath(); ctx.moveTo(wL, 8); ctx.lineTo(wL, h - 8); ctx.stroke();
+
+  // ---- RIGHT HALF: 3D Isometric CoWoS Accelerator Package ----
+  const cxR = wL + (w - wL) * 0.5, cyR = h * 0.62, sc = Math.min(w - wL, h) / 310;
+  const iso = (X, Y, Z) => [cxR + (X - Y) * 86 * sc, cyR + (X + Y) * 45 * sc - Z * sc];
+  const box = (x1, y1, x2, y2, z0, z1, cT, cL, cR, stC) => {
+    const p010 = iso(x1,y2,z0), p110 = iso(x2,y2,z0), p111 = iso(x2,y2,z1), p011 = iso(x1,y2,z1);
+    const p100 = iso(x2,y1,z0), p101 = iso(x2,y1,z1), p001 = iso(x1,y1,z1);
+    ctx.fillStyle = cL; ctx.beginPath(); ctx.moveTo(...p010); ctx.lineTo(...p110); ctx.lineTo(...p111); ctx.lineTo(...p011); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = cR; ctx.beginPath(); ctx.moveTo(...p100); ctx.lineTo(...p110); ctx.lineTo(...p111); ctx.lineTo(...p101); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = cT; ctx.beginPath(); ctx.moveTo(...p001); ctx.lineTo(...p101); ctx.lineTo(...p111); ctx.lineTo(...p011); ctx.closePath(); ctx.fill();
+    if (stC) { ctx.strokeStyle = stC; ctx.lineWidth = 1; ctx.stroke(); }
+  };
+  box(-1.15, -0.95, 1.15, 0.95, -14, 0, '#0f5132', '#063a22', '#042817', 'rgba(52,211,153,0.35)');
+  const hbms = [[-0.95,-0.75,-0.62,-0.3],[-0.95,-0.2,-0.62,0.2],[-0.95,0.3,-0.62,0.75],[0.62,-0.75,0.95,-0.3],[0.62,-0.2,0.95,0.2],[0.62,0.3,0.95,0.75]];
+  [0,1,3].forEach(i => box(...hbms[i], 0, 14, '#334155', '#1e293b', '#0f172a', 'rgba(56,189,248,0.45)'));
+  box(-0.54, -0.54, 0.54, 0.54, 0, 16, cov < 0.999 ? '#7f1d1d' : '#334155', '#1e293b', '#0f172a', 'rgba(255,255,255,0.5)');
+  // 3D TIM disk on die
+  const rN = Math.min(R / R_EQ, 1) * 0.54, gZ = 8 + 56 * Math.pow(ht / H0, 0.52);
+  ctx.fillStyle = `rgba(${RGB[sel][0]},${RGB[sel][1]},${RGB[sel][2]},0.88)`;
+  ctx.beginPath();
+  for (let k = 0; k <= 36; k++) {
+    const a = k / 36 * 2 * PI;
+    const pt = iso(Math.max(-0.54, Math.min(0.54, rN * 1.12 * Math.cos(a))), Math.max(-0.54, Math.min(0.54, rN * 1.12 * Math.sin(a))), 17 + gZ);
+    if (k === 0) ctx.moveTo(...pt); else ctx.lineTo(...pt);
+  }
+  ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.stroke();
+  [2,4,5].forEach(i => box(...hbms[i], 0, 14, '#334155', '#1e293b', '#0f172a', 'rgba(56,189,248,0.45)'));
+  // Translucent Cold Plate
+  box(-0.88, -0.78, 0.88, 0.78, 18 + gZ, 32 + gZ, 'rgba(246,177,131,0.45)', 'rgba(194,103,58,0.48)', 'rgba(138,67,34,0.5)', 'rgba(251,146,60,0.7)');
+
+  ctx.fillStyle = COL[sel]; ctx.font = 'bold 11.5px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('2D Lubrication Velocity & Plug Field', 12, 18);
+  ctx.fillText('3D CoWoS + 6× HBM3e Accelerator Stack', wL + 12, 18);
+
+  // Readout updates
+  $('rd_h').textContent = (ht * 1e6).toFixed(1) + ' µm' + (stalled ? ' (STALL)' : '');
+  $('rd_cov').textContent = (cov * 100).toFixed(1) + ' %';
+  $('rd_dT').textContent = dT.toFixed(1) + ' °C';
+  $('rd_dT').style.color = dT > 10 ? '#ff4757' : '#2ed573';
+  $('rd_clk').textContent = clk + ' MHz';
+  $('rd_clk').style.color = clk < 1980 ? '#ff4757' : '#2ed573';
+  $('rd_reg').textContent = 'ε=' + (ht / R).toExponential(1) + ' ✓';
+}
+
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 0.1); last = now;
+  s = Math.min(1, s + dt / 14);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+document.querySelectorAll('.mbtn').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.mbtn').forEach(x => {
+    x.className = 'mbtn px-2.5 py-1 rounded font-semibold border border-[var(--card-border)] bg-[var(--card)] text-[var(--muted-foreground)]';
+  });
+  b.className = 'mbtn px-2.5 py-1 rounded font-semibold border border-cyan-400 bg-cyan-500/20 text-[var(--foreground)]';
+  sel = b.dataset.m; s = 0;
+});
+$('F0').oninput = () => { F0 = +$('F0').value; $('F0v').textContent = F0 + ' N'; s = 0; };
+$('ty').oninput = () => { TY = +$('ty').value; $('tyv').textContent = (TY / 1000).toFixed(1) + ' kPa'; s = 0; };
+$('reset').onclick = () => { s = 0; };
+window.addEventListener('themechange', draw);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
