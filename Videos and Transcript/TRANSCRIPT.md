@@ -298,11 +298,60 @@ Newtons. So either formulate with dispersants to keep tau y below about 500 pasc
 00:13:43,968 --> 00:14:20,588 [Yaswitha]
 And the Newtonian lab supports the same lesson, like coverage and gap, not just conductivity, set the temperature drop. The thermal resistance of the bond line follows the same ordering, about 0.0062 Kelvin per watt for the shear thinning paste and 0.006 Kelvin per watt for the Newtonian, and about 0.008 for shear thickening and 0.00024 for the stalled Bingham paste, like almost 10 times worse than the shear thinning case.
 
-
-### Section 6
-
-
-
 ### Section 7
+00:00:00,480 --> 00:00:23,040 [Avanika]
+Um, so for the final part, let's start with a wrap-up. And, uh, so w- the final implementations and the further extension of this, uh, the further scope of this project can be working with AI and being able to simulate these work, uh, simulate these fluid flows in real time. So we have asked AI to done-- do that, and this, these, there are two AI-rendered flows, which is, which you can see on the, 
+
+00:00:24,460 --> 00:00:36,540 [Avanika]
+um, repository. So we have AI-rendered simulations, both of which are runnable, but, uh, we haven't been, uh... So for further scope of this project can be working with AI and being able to verify them, um, 
+
+00:00:37,820 --> 00:01:01,960 [Avanika]
+and so that we can actually visualize these fluid flows in real time. Now, moving on to what our project's, uh, final, um, like what are the assumptions we're making and what are the parts that we're leaving out? So one thing we've modeled is a Newtonian flow, which gives us a clean baseline, but it's never being able to address the flow. It is something that it, it just keeps running and, uh, as like indefinitely with time, 
+
+00:01:03,200 --> 00:01:28,400 [Avanika]
+uh, which is also, um, yeah, the pace keeps staying indefinitely with time. The second, uh, fluid flow that we discovered was the shear thinning under the power law, uh, where it captures the viscosity dropping under high stress, uh, high shear rates, yet it has no yield stress, bec- meaning it starts flowing even under a tiny supplied force. Then when we talk about the Bingham flow diagram, uh, the... 
+
+00:01:29,760 --> 00:03:31,300 [Avanika]
+what do we understand from that is like we're able to introduce a yield stress, we're able to put in a rest condition, but there is again a fallback where there is, uh, no shear thinning above the yield, and once yield is ex- exceeded, the stress scales linearly with the shear rate. So with these, uh, three models, if you want to, uh, model real, real-time, uh, real-life, uh, TIMs, we realize that we need to kind of co- come to a, a trade-off point between these two models. So we, in reality, these TIMs exhibit both the yield behavior as well as the shear thinning behavior, and, uh, we try to bring in this Herschel-Bulkley model, which basically, uh, introduces tau equal to tau y plus K, uh, shear rate to the power n. Now, the good news about our mod- di-modular approach or bimodal approach is that, uh, with the, because of the modularity, we're able to directly implement this Herschel-Bulkley model, uh, where it's able to get into, it's able to being implemented in our existing framework. And all we have to do is just change the stress law, the constitutive law, uh, without requiring to change anything about the conservation equations. And, um, what are the, uh, what, what can we, what... So when we talk about the, uh, how much we're able to model and how much we're not able to model, we weren't able to model the, we weren't able to account for certain real-life aspects such as, uh, filler jamming at the minimum bond line thickness because the solid particles halt thinning regardless of the pressure, and temperature-dependent viscosity wasn't being able to... We weren't, we didn't implement a temperature-dependent viscosity because it will change, uh, both the assembly and the operation. And, uh, geometric, uh, asymmetries weren't accounted for because, uh, we could have a die or a heat sink tilt and off-center paste dispensing, and we didn't account for thermal, uh, contact resistance at the interface, um, where we can... as well as like the air voids and the pump-out, which is driven by repeated thermal cycling. And we also didn't account for lateral heat spreading. So one, 
+
+00:03:32,740 --> 00:03:39,420 [Avanika]
+uh, so we just applied a one-dimensional hotspot treatment, which was neglecting, uh, lateral heat spread. 
+
+00:03:40,440 --> 00:04:25,840 [Avanika]
+Uh, what is, uh, for, like, what can we do to model real-life TIMs is, uh, uh, like we need to, like, we need to have a experimental rheology, and we need to get parameters from these measurements rather than just solely, uh, uh, relying on, uh, assumed parameters. So what are the things that we could extract is the consistency index K, the flow behavior n, and the yield stress tau. So all of these quantities can be, uh, ex- can be extracted. And having measured parameters grounds the model in real material behavior and show how closely the different commercial or lab formulation match these idealized closures. And, uh, we can develop a model which can, uh, exactly model real-life TIMs. 
+
+00:04:26,980 --> 00:04:27,980 [Avanika]
+Um, moving on to, 
+
+00:04:29,480 --> 00:05:06,540 [Avanika]
+uh, we can progressively, like, layer the real-world physics by coupling viscosity to temperature, so local heating fee- local heating feeds back into the flow resistance and the thinning dynamics. We can account for the minimum bond line limits, the filler jamming, and the non-ideal geometry that we just discussed about. And, uh, yeah, we can extend it to the thermal side beyond the 1D hotspot. We can incorporate lateral spreading. We can also talk about long-term degradation mechanisms, which usually, uh, happen in real-life hardware chips, where there is voiding or there's some pump-out under thermal cycling. So in real-life chips, uh, one major, uh, 
+
+00:05:07,680 --> 00:05:23,940 [Avanika]
+bottleneck is basically that it's not just a temperature being uniformly applied, but rather the die is undergoing heating, a constant loop of, uh, heating and cooling cycles. So it has to account for that. There will be degradation mechanisms, and we can extend this model to account for those too. 
+
+00:05:25,400 --> 00:06:34,204 [Avanika]
+And finally, uh, what can we do for this model is we can, we can have direct experimental validation, where we can compare the model-predicted bond line thickness and the thermal rises against physical measurements on text fixtures and hardware. Uh, right now, we state openly that our results are validated for internal consistency and the limiting cases. It is not yet against a physical, uh, TIM sample. And closing that gap is a milestone that turns this framework from a verified mathematical model into a validated design tool, and that increases the scope and the application of this project. Uh, now, what were we able to achieve and what were the three questions that we kept asking ourselves is, how thick is the layer? How long does it take for this to, um... Thin out to a specific bond line thickness. So we realized that the Newtonian paste thins as T power minus 1 by 4 and T power minus 1 by 2 without ever coming to a complete stop. The shear thinning is able to accelerate the thinning process. And in contrast to this, the yield stress arrests the flow at finite bond line, um, uh, thickness, which we derived as a critical bond line thickness using the Bingham model. And, 
+
+00:06:35,784 --> 00:07:15,884 [Avanika]
+um, we also have to... Another question was like, how many, uh, temp- how much was the temperature drop? Were we able to get some significant figures is yes. So with our benchmark of 700-watt GPU reference case, the difference is dramatic. Were we able to saw around, uh, 1.85 Kelvin for a well-behaved shear-thin paste, and for a Bingham paste, that was about 16.7 Kelvin, which is a huge difference. And that is why we were able to, uh, visually see how these models could affect something as important as a temperature rise, which is the where the entire thermal bottleneck is being addressed, and thermal throttling, as introduced in the, as introduced in the beginning. 
+
+00:07:17,164 --> 00:07:40,884 [Avanika]
+Um, and how far, like, what are our assumptions? Are our assumptions even useful when it comes to, um, application is yes. We did take, uh, uh, more assumptions because we wanted to model something simple, but somewhere along the way, the mathematics did get a lot complicated. Uh, but however, verifications all passed. We have 20 verification tests which is being run in the repository, 
+
+00:07:42,424 --> 00:07:45,724 [Avanika]
+uh, under the non-Newtonian model I worked on. So we can, 
+
+00:07:46,984 --> 00:07:52,784 [Avanika]
+uh... So all this has a workflow which verifies all these physics, and we're able to, um, 
+
+00:07:54,184 --> 00:08:56,004 [Avanika]
+get standard results out of them. So there we go when it comes to the verification. So our model is solid when it comes to, uh, whether the assumptions hold and what are the margins for them, all defined in the report. Uh, finally, we have to talk about what, how did transport phenomena shape this project, uh, uh, entirely. It's because conservation laws are universal, and these closures are material-specific. We were able to model different closures for one particular fluid, which is the thermal paste, and, uh, combining the single continuity flux, a linear stress balance, and we had three different flow closures. Like, the overall, the overlying thermal network gives us an end-to-end chain, like which starts from the clamp force to the junction temperature. And one important design rule that we learned is that whatever it is, the paste yield stress should be below the critical threshold, and that way we can favor the thinning, uh, the shear thinning behavior, and we can, uh, effectively thin the material under the load without stalling it prematurely. 
+
+00:08:57,124 --> 00:09:44,504 [Avanika]
+So we work with all these laws to just model that critical, uh, yield stress, and that is all the model is. So this has been a very, uh, informative as well as, uh, a thorough learning process where we learned how we can shift these abstract physical equations from the transport phenomena course into addressing a real-life, uh, problem, which is the thermal bottlenecks in the chips. And we also realized there's so much scope to this. Just by modeling these, uh, diagrams and simulating them, we realized how far we can actually not just simulate these problems, but also be able to solve them one day through these simulations themselves. And all of this just from knowing these underlying physics equations and these laws which shape these, um, fluid flows. So yeah, thank you for the opportunity, 
+
+00:09:45,584 --> 00:09:51,104 [Avanika]
+and, uh, we can... The, the results are reproducible through the repository. Thank you.
+
 
 
