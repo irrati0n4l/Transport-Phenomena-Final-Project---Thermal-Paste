@@ -1,1 +1,16 @@
 
+# Our AI Declaration
+
+This is to declare our AI usage \- where we used AI tools and how we have done so. We have attached our AI chats separately.
+
+I, **Pranav Yadavalli (MS25BTECH11029)**, declare that I have used AI in a significant portion of the work. I have used **Claude**, **Gemini** and **ElevenLabsAI** for my work (all in their free tier).  
+Claude Sonnet 5.5 Low was used to formulate the constitutive prompt describing **my idea** of the Newtonian paste Simulator which was fed back into Claude Sonnet 5.5 High along with references of Prof. Saswata’s notes to generate the interactive HTML. Once the model was made and refined, a report in a story form which bridged the theory to the exact equations of Stefan’s law which is implemented in the simulator.  
+Gemini was used to learn the basics of Git to upload and commit all the code and files which comprise our submission.  
+Finally, ElevenLabsAI was used to transcribe the explanation video sections and converted into the [TRANSCRIPT.md](http://TRANSCRIPT.md) in the GitHub repository.
+
+I, **Avanika S (MS25BTECH11007)**, declare Google Antigravity IDE (using **Gemini 3.8 Flash, Gemini 4 Neon/Hydrogen/Argon, GPT-OSS 120B,** and **Claude Opus 4.6/5.5**) was used to clarify the AI-accelerator hardware scope, read up on papers related to TIMs and thermal throttling, identify thermal paste squeeze flow, and implement diagnostic code evaluating the user's Newtonian, Power-Law, and Bingham fluid-flow ideas. It was also used to build a quick interactive HTML5 simulator integrated into the project repository. Additionally, **Claude Sonnet 4.6** was used to generate an alternative AI-rendered simulation. All governing physics and derivations were directed by me using the concepts learnt throughout the course duration.  
+Finally, **ElevenLabsAI** was used to transcribe the explanation video sections and converted into the [TRANSCRIPT.md](http://TRANSCRIPT.md) in the GitHub repository.
+
+I, **Yaswitha Ch (MS25BTECH11012)**,  declare that I used Gemini as an assistive tool during specific parts of my contribution to this Transport Phenomena project, while the conceptual framing, verification against Prof. Saswata’s lecture notes, and final editing were carried out by me.  
+Using the course lecture slides and our team’s simulation files as reference, I used Gemini to help organize and cross-check how key course concepts : including the Reynolds Transport Theorem, Navier–Stokes thin-gap reduction, rheological closures, transient Fourier conduction, and dimensional analysis , compare directly to our thermal paste squeeze-flow model. Based on our team’s chosen theme of thermal throttling, I also took Gemini’s assistance in structuring and refining the comparative theoretical write-up for the report, as well as drafting the time-balanced three-speaker presentation script and slide outline.  
+Finally, I used **Gemini** to generate and troubleshoot **LaTeX** table code for formatting the final PDF report. All generated content and formatting were reviewed, edited, and integrated by me alongside the project code and documentation in our team’s GitHub repository.Finally, **ElevenLabsAI** was used to transcribe the explanation video sections and converted into the [TRANSCRIPT.md](http://TRANSCRIPT.md) in the GitHub repository.
