@@ -6,13 +6,13 @@ Hey, everyone. Imagine this, you're an hour long into a render, and without any 
 I am Yaswita, and I cover the general theory and the application-specific equations, the lubrication reduction, dimension analysis, and the GPU thermal model. Everything we use comes from the three lecture decks of the Transport Phenomena course, like conservation and transport equations, momentum, energy and fluid flow, and dimensionless numbers as ratios of physical effects. And mass, momentum, energy balances are the same for every paste. Here, the-- only the stress law changes. Our two components are a Newton closure and ones with power law and Bingham closures. 
 
 00:01:52,340 --> 00:02:06,680 [Avanika]
-Hello, guys. This is Avanika, and I have worked on the non-Newtonian model, which mainly focuses on the power law and the Bingham models, and does verification to, to a suite which runs over 20 tests to verify whether the physics are followed with the assumptions. 
+Hello, guys. This is Avanika, and I have worked on the non-Newtonian model, which mainly focuses on the power law and the Bingham models, and does verification through a suite which runs over 20 tests to verify whether the physics are followed with the assumptions. 
 
 00:02:08,199 --> 00:02:22,380 [Avanika]
-Now, uh, moving on to, like, what, uh, brings in... So what else, what else we modeling using this non-Newtonian is that any real-life, uh, GPU with, like, a 700 watt, as we're seeing in this hardware benchmark, would require a 
+Now, uh, moving on to, like, what, brings in... So what else, what else we modeling using this non-Newtonian is that any real-life, uh, GPU with, like, a 700 watt, as we're seeing in this hardware benchmark, would require a 
 
 00:02:23,460 --> 00:02:55,280 [Avanika]
-constant wa- would, uh, would be where, uh, we are analyzing under a constant volume, uh, and we are verifying it over, uh, various theorems such as Reynolds theorem. And we are also verifying that the lubrication of the creeping flow assumptions hold via the dimensionless groups, such as the aspect ratio and the Reynolds number. And we're coupling it with the resulting gap, which varies over time, which was the bond line thickness as well as the, uh, radius of coverage. And we're also integrating the Fourier heat conduction to quantify the exact, uh, temperature change in the 700-watt GPU.
+constant would, would be where, we are analyzing under a constant volume,  and we are verifying it over, uh, various theorems such as Reynolds theorem. And we are also verifying that the lubrication of the creeping flow assumptions hold via the dimensionless groups, such as the aspect ratio and the Reynolds number. And we're coupling it with the resulting gap, which varies over time, which was the bond line thickness as well as the,  radius of coverage. And we're also integrating the Fourier heat conduction to quantify the exact,  temperature change in the 700-watt GPU.
 
 ### Section 1
 00:00:00,520 --> 00:00:04,400 [Yaswitha]
