@@ -99,14 +99,12 @@ Open [`squeeze_flow_tim.ipynb`](squeeze_flow_tim.ipynb) directly in VS Code, Jup
 jupyter lab squeeze_flow_tim.ipynb
 ```
 
-### Step 4 — Compile the LaTeX Report (`report/main.tex`) on Overleaf or Locally
-* **On Overleaf (Zero Local TeX Setup):** Upload [`report/main.tex`](report/main.tex) and the vector PDFs in [`figures/`](figures/) (`fig1_velocity_stress.pdf` through `fig6_regime_validity.pdf`) preserving the `report/` and `figures/` folder structure (or place `figures/` next to `main.tex` and adjust `../figures/` to `figures/`). Compile with **pdfLaTeX**.
-* **Local TeX Live / MiKTeX Compilation:**
-  ```bash
-  cd report
-  pdflatex main.tex
-  pdflatex main.tex
-  ```
+### Step 4 — Read the Technical Report (`report.md` & `non_newtonian.pdf`)
+Review the complete mathematical derivations, governing equations, rheological closure proofs, and thermal bottleneck analysis in either format:
+- **Markdown Source:** [`report/report.md`](report/report.md) — Editable manuscript with LaTeX equations and inline figures.
+- **Compiled PDF:** [`report/non_newtonian.pdf`](report/non_newtonian.pdf) — Typeset, publication-ready report for offline reading.### Step 4 — Editable (markdown) and compiled pdf  (`report/report.md`) 
+
+
 
 ---
 
