@@ -412,13 +412,13 @@ Coming to the remaining checks,  the remaining checks target scaling and units.
 The checks 11 to the 13 fit the late-time slope of each trajectory against the predicted exponent, 
 
 00:01:29,840 --> 00:01:41,300 [Yaswitha]
-minus 2 and over 3N plus 5 for N equal to 1.5 and 1.3 with errors below 3 times 10 to the minus 10. 
+minus 2 N over 3N plus 5 ,for N equal to 1,0.5 and 1.3 with errors below 3 times 10 to the minus 10. 
 
 00:01:42,580 --> 00:01:52,160 [Yaswitha]
 Check 14 rescales the base units of mass, length, and time arbitrarily and confirms the gap history is invariant, which is dimensional homogeneity. 
 
 00:01:53,600 --> 00:02:05,740 [Yaswitha]
-And we also cross-check the two components against each other. The Newtonian lab and the power law model share the stiffened limit, so the gap laws agree at N equal to 1. 
+And we also cross-check the two components against each other. The Newtonian lab and the power law model share the stefan limit, so the gap laws agree at N equal to 1. 
 
 00:02:08,699 --> 00:02:31,800 [Yaswitha]
 And while preparing this video, we rederived every headline number. We found one real mistake in our earlier draft. The critical yield stress had been quoted as 1.38 kilopascals, but the correct value from our own stall equations is 2.8 kilopascals, a missing factor of pi. We also reran the 60-second 
