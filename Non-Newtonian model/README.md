@@ -33,9 +33,10 @@ Guided by the core principle of the course (**"Conservation is universal; closur
 
 ```text
 Transport_Phenomena-Thermal-paste/
-├── squeeze_flow_tim.ipynb          # Phase 3: Executed Jupyter Notebook (Equations & Code Side-by-Side)
+├── code_snaippets/
+    squeeze_flow_tim.ipynb          # Executed Jupyter Notebook (Equations & Code Side-by-Side)
 ├── report/
-│   └── main.tex                    # Phase 4: Complete Overleaf-ready 2-column LaTeX physics report
+│   └── non_newtonian.pdf           # Physics equations writeup                  
 ├── src/
 │   ├── params.py                   # Component 1: 700 W GPU benchmark & material dataclasses (single source of truth)
 │   ├── rheology_models.py          # Component 2: Analytical & semi-analytical momentum engine (Stefan, Scott, Bingham)
