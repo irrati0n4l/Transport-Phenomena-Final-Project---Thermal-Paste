@@ -1,6 +1,6 @@
 ### Intro
 00:00:00,320 --> 00:01:07,800 [Pranav]
-Hey, everyone. Imagine this, you're an hour long into a render, and without any warning, the frame rate just drops. Nothing has crashed. The processor has simply decided to run slower because the heat could not leave the chip fast enough. This is called thermal throttling, and one of its quietest culprits is a layer you can barely see, a film of thermal paste only a few micrometers thick. I am Pranav, and I've built the Newtonian simulator, which is called the Paste Squeeze Lab. Our project asks a precise question about that film. When a cooler is clamped on with a steady force, how thick does the paste layer end up? How long does it take to get there? And how many degrees does that thickness cost? To answer it, we've built two independent components. The first is a basic Newtonian squeeze flow simulator, and, uh, which you'll see, running live soon. The second is an analytical and numerical study of the non-idealities, which is the non-Newtonian pastes, which include power law and Bingham flow on an example of a 700-watt AI GPU. 
+Hey, everyone. Imagine this, you're an hour long into a render, and without any warning, the frame rate just drops. Nothing has crashed. The processor has simply decided to run slower because the heat could not leave the chip fast enough. This is called thermal throttling, and one of its quietest culprits is a layer you can barely see, a film of thermal paste only a few micrometers thick. I am Pranav, and I've built the Newtonian simulator, which is called the Paste Squeeze Lab. Our project asks a precise question about that film. When a cooler is clamped on with a steady force, how thick does the paste layer end up? How long does it take to get there? And how many degrees does that thickness cost? To answer it, we've built two independent components. The first is a basic Newtonian squeeze flow simulator, and, , which you'll see, running live soon. The second is an analytical and numerical study of the non-idealities, which is the non-Newtonian pastes, which include power law and Bingham flow on an example of a 700-watt AI GPU. 
 
 00:01:10,800 --> 00:01:47,960 [Yaswitha]
 I am Yaswita, and I cover the general theory and the application-specific equations, the lubrication reduction, dimension analysis, and the GPU thermal model. Everything we use comes from the three lecture decks of the Transport Phenomena course, like conservation and transport equations, momentum, energy and fluid flow, and dimensionless numbers as ratios of physical effects. And mass, momentum, energy balances are the same for every paste. Here, the-- only the stress law changes. Our two components are a Newton closure and ones with power law and Bingham closures. 
@@ -9,7 +9,7 @@ I am Yaswita, and I cover the general theory and the application-specific equati
 Hello, guys. This is Avanika, and I have worked on the non-Newtonian model, which mainly focuses on the power law and the Bingham models, and does verification through a suite which runs over 20 tests to verify whether the physics are followed with the assumptions. 
 
 00:02:08,199 --> 00:02:22,380 [Avanika]
-Now, uh, moving on to, like, what, brings in... So what else, what else we modeling using this non-Newtonian is that any real-life, uh, GPU with, like, a 700 watt, as we're seeing in this hardware benchmark, would require a 
+Now moving on to, like, what, brings in... So what else, what else we modeling using this non-Newtonian is that any real-life GPU with, like, a 700 watt, as we're seeing in this hardware benchmark, would require a 
 
 00:02:23,460 --> 00:02:55,280 [Avanika]
 constant would, would be where, we are analyzing under a constant volume,  and we are verifying it over, uh, various theorems such as Reynolds theorem. And we are also verifying that the lubrication of the creeping flow assumptions hold via the dimensionless groups, such as the aspect ratio and the Reynolds number. And we're coupling it with the resulting gap, which varies over time, which was the bond line thickness as well as the,  radius of coverage. And we're also integrating the Fourier heat conduction to quantify the exact,  temperature change in the 700-watt GPU.
@@ -109,7 +109,7 @@ So everything collapses down to a clean local slit flow balance, that is 0 is eq
 Integrating across the gap with symmetry about the mid-plane gives a result we will reuse for all three pastes. The shear stress is linear across the gap, tau equals minus G times zeta, where G is the radial pressure gradient. 
 
 00:06:49,540 --> 00:07:07,540 [Yaswitha]
-And we haven't even picked a specific material yet. No viscosity model, no yield stress, and, uh, still we already know the exact shape of the stress field. Conservation laws alone handed us both the continuity flux and this linear stress profile.
+And we haven't even picked a specific material yet. No viscosity model, no yield stress, and, still we already know the exact shape of the stress field. Conservation laws alone handed us both the continuity flux and this linear stress profile.
 
 ### Section 2
 00:00:01,420 --> 00:01:16,120 [Pranav]
@@ -201,7 +201,7 @@ And only then unlocks the thermal view once the time has been completed.
 Next, let me show you the thermal view. 
 
 00:03:11,740 --> 00:03:50,200 [Pranav]
-Here's the thermal view. The squeeze has stopped, and the geometry is frozen, so the problem is steady conduction across the gap. An assumption I've made here is that the, uh, thermal effect of the, die does not really affect any of the geometry of the paste. One dimension is enough here because, across-gap gradient exceeds the along-plate gradient by, the square of 1 over epsilon, which is about-- which is of the order of 10 lakhs. Here is the heat flux map. 
+Here's the thermal view. The squeeze has stopped, and the geometry is frozen, so the problem is steady conduction across the gap. An assumption I've made here is that the,  thermal effect of the, die does not really affect any of the geometry of the paste. One dimension is enough here because, across-gap gradient exceeds the along-plate gradient by, the square of 1 over epsilon, which is about-- which is of the order of 10 lakhs. Here is the heat flux map. 
 
 00:03:54,180 --> 00:04:05,220 [Pranav]
 Fully covered cells carry the, the heat completely through the paste, and, the thermal resistance of, the layer is R times H over the die area. 
@@ -240,7 +240,7 @@ for a 50-micrometer gap, approximately, as we can see here, the resistance goes 
 0.036 at 75%, and 0.05 at 50%. Clearly, a bad spread is not at all a small effect. 
 
 00:07:26,204 --> 00:07:58,004 [Pranav]
-One practical note, the lab's default 60 Kelvin drop is a legitimate mathematical case, but it's not a real chip. Because for a 100 watt at 62 micrometers, 100-watt chip at 62-micrometer distance, the pace drops about 3.61, uh, 3.1 Kelvin. So we set the die and the heat sink temperatures to differ by that amount. The pace flare itself settles in, uh, about half a millisecond, which we, which we verified with the Fourier number series. 
+One practical note, the lab's default 60 Kelvin drop is a legitimate mathematical case, but it's not a real chip. Because for a 100 watt at 62 micrometers, 100-watt chip at 62-micrometer distance, the pace drops about 3.61,  3.1 Kelvin. So we set the die and the heat sink temperatures to differ by that amount. The pace flare itself settles in,  about half a millisecond, which we, which we verified with the Fourier number series. 
 
 00:08:01,864 --> 00:08:05,984 [Pranav]
 There are also explanations for each module given. 
@@ -249,7 +249,7 @@ There are also explanations for each module given.
 Explanations which have also the equations used and their derivation and what each notation means. 
 
 00:08:30,364 --> 00:09:01,584 [Pranav]
-Let's compare whatever we've seen with theory. The peak pressure on screen was twice the mean, and, the parab- as the parabola climbs. The three gap times match the closed form of 17, 109, and, uh, 475 seconds pretty closely. Changing the viscosity only rescaled the time, as we have seen, which is the similarity collapse. And the thermal view reproduced the parallel conductance formula, as we have seen in the graphs. 
+Let's compare whatever we've seen with theory. The peak pressure on screen was twice the mean, and, the parab- as the parabola climbs. The three gap times match the closed form of 17, 109, and, 475 seconds pretty closely. Changing the viscosity only rescaled the time, as we have seen, which is the similarity collapse. And the thermal view reproduced the parallel conductance formula, as we have seen in the graphs. 
 
 00:09:04,924 --> 00:09:20,744 [Pranav]
 So a coverage loss shows up directly as lost watts per Kelvin. Three independent checks, one single demonstration. This completes the Newtonian component, and Avanika will now show how her framework handles non-Newtonian pastes.
@@ -259,61 +259,61 @@ So a coverage loss shows up directly as lost watts per Kelvin. Three independent
 So moving on to how we have implemented the non-Newtonian methods of power-law and Bingham squeeze flow. So if we talk about real pastes, real pastes are filled suspensions. They either have metallic, um, dispersants or 
 
 00:00:15,700 --> 00:00:40,480 [Avanika]
-other kind of, uh, silicones. So the Newtonian closure is only the start. Our second component is, uh, our independent model number two. Mo-mostly keeps the, uh, it will keep the conservation untouched, and we will only swap the constitutive stress law. Now, what is the first implementation is the Ostwald-de Waele power law. That is tau equals to K times shear rate to the power n. The linear distribution is unchanged. 
+other kind of, silicones. So the Newtonian closure is only the start. Our second component is, our independent model number two. Mo-mostly keeps the, it will keep the conservation untouched, and we will only swap the constitutive stress law. Now, what is the first implementation is the Ostwald-de Waele power law. That is tau equals to K times shear rate to the power n. The linear distribution is unchanged. 
 
 00:00:41,520 --> 00:00:53,600 [Avanika]
-The linear stress distribution is unchanged, and we will be inverting the power law to give the velocity profile with the exponent n, uh, plus 1 over n. And shear-thinning paste will have n below 1, 
+The linear stress distribution is unchanged, and we will be inverting the power law to give the velocity profile with the exponent n, plus 1 over n. And shear-thinning paste will have n below 1, 
 
 00:00:55,180 --> 00:01:13,440 [Avanika]
-having blunt course and, uh, steep near-wall gradients, and the shear-thickening pastes are more, uh, the velocity profile would look more of a pointed than a pa-parabola. Integrating across the gap and equating to the continuity flux will give us a pressure gradient G, which is proportional to KW to the nr, 
+having blunt course and,  steep near-wall gradients, and the shear-thickening pastes are more,  the velocity profile would look more of a pointed than a pa-parabola. Integrating across the gap and equating to the continuity flux will give us a pressure gradient G, which is proportional to KW to the nr, 
 
 00:01:15,100 --> 00:01:18,220 [Avanika]
-uh, to the n over h to 2n plus 1. 
+ to the n over h to 2n plus 1. 
 
 00:01:19,720 --> 00:01:37,600 [Avanika]
-So, uh, we have implemented, uh, our non-Newtonian models in this Python notebook. We can see the three constitutive families, uh, where we've, uh, expressed the power laws, and we've taken two different indices for the shear, uh, thinning and shear thickening. And, um, 
+So,  we have implemented, our non-Newtonian models in this Python notebook. We can see the three constitutive families,  where we've, expressed the power laws, and we've taken two different indices for the shear, thinning and shear thickening. And, um, 
 
 00:01:40,840 --> 00:01:42,860 [Avanika]
 we have implemented the... 
 
 00:01:48,020 --> 00:02:06,580 [Avanika]
-Uh, so this way, we are-- when we're able to integrate across the gap, we get the force as in, as in terms of Scott's law, F equals to 2 pi K over n plus 3 times 2n plus 1 over n to the power n times W to the nr to the n plus 3 over h to 2n plus 1. 
+ So this way, we are-- when we're able to integrate across the gap, we get the force as in, as in terms of Scott's law, F equals to 2 pi K over n plus 3 times 2n plus 1 over n to the power n times W to the nr to the n plus 3 over h to 2n plus 1. 
 
 00:02:09,500 --> 00:02:16,440 [Avanika]
-And, uh, we are, we're able to also, uh, get the two-phase constant force trajectory 
+And, we are able to also,  get the two-phase constant force trajectory 
 
 00:02:17,580 --> 00:02:21,300 [Avanika]
 when we are able to implement the constant volume two-phase analysis. 
 
 00:02:25,740 --> 00:02:36,580 [Avanika]
-Moving on to, uh, at constant force with volume conservation, the gap is obeys a separable power-law equation. The late-time thinning exponent is minus 2n over 3n plus 5, 
+Moving on to, at constant force with volume conservation, the gap is obeys a separable power-law equation. The late-time thinning exponent is minus 2n over 3n plus 5, 
 
 00:02:41,140 --> 00:03:10,000 [Avanika]
-uh, minus 0.154 for n equal to 0.5, minus one-quarter for Newtonian, and minus 0.2924, n equal to 1.3. After the paste reaches the die edge, the exponent steepens to minus n over n plus 1. A useful way to see why shear thin-thinning matters is the effective viscosity is K times the shear rate to n minus 1. During the early compression, uh, the wall shear rate is roughly 
+ minus 0.154 for n equal to 0.5, minus one-quarter for Newtonian, and minus 0.2924, n equal to 1.3. After the paste reaches the die edge, the exponent steepens to minus n over n plus 1. A useful way to see why shear thin-thinning matters is the effective viscosity is K times the shear rate to n minus 1. During the early compression,the wall shear rate is roughly 
 
 00:03:11,460 --> 00:03:29,380 [Avanika]
 rw over h square, and it exceeds 100 per second. So for K equal to 100 and n equal to one-half, the effective viscosity falls to about 10 Pascal-seconds, an order of magnitude which is below the Newtonian value. And as the gap closes, the shear rate drops, and the viscosity is able to recover. 
 
 00:03:31,400 --> 00:03:39,940 [Avanika]
-Now, uh, moving on to rung two of our implementation is Bingham yield stress squeeze flow, and we follow the Covey-Stanmore cubic. 
+Now,  moving on to rung two of our implementation is Bingham yield stress squeeze flow, and we follow the Covey-Stanmore cubic. 
 
 00:03:41,040 --> 00:03:51,200 [Avanika]
-Uh, so mostly this applies to heavily loaded silver and alumina thermal, uh, paste form of-- which form a percolated particle network, and we define a finite yield stress. 
+ so mostly this applies to heavily loaded silver and alumina thermal, paste form of-- which form a percolated particle network, and we define a finite yield stress. 
 
 00:03:53,420 --> 00:04:24,040 [Avanika]
-The stress law is tau equals tau y plus m-- mu time-- mu p times shear rate, but only where the shear exceeds the yield stress. Our universal linear stress law immediately predicts the structure. The stress is zero at the mid-plane and the largest at the walls. So a central plug of half thickness, uh, z0 equals tau y over g stays unyielded and flanked by the two sheared layers. Now again, integrating the piecewise velocity gives the Buckingham-Reiner flux, and setting it equal to 
+The stress law is tau equals tau y plus m-- mu time-- mu p times shear rate, but only where the shear exceeds the yield stress. Our universal linear stress law immediately predicts the structure. The stress is zero at the mid-plane and the largest at the walls. So a central plug of half thickness,  z0 equals tau y over g stays unyielded and flanked by the two sheared layers. Now again, integrating the piecewise velocity gives the Buckingham-Reiner flux, and setting it equal to 
 
 00:04:25,440 --> 00:04:31,320 [Avanika]
-rw over 2 produces a cubic equation for the plug fraction, which is, uh, z0. 
+rw over 2 produces a cubic equation for the plug fraction, which is, z0. 
 
 00:04:32,440 --> 00:04:42,340 [Avanika]
-z0 cubed minus 3 plus 2 times s time, uh, times z0 plus 2 equals 0, where s is the dimensionless local shear parameter. 
+z0 cubed minus 3 plus 2 times s time, times z0 plus 2 equals 0, where s is the dimensionless local shear parameter. 
 
 00:04:48,100 --> 00:05:11,220 [Avanika]
-The Bingham squeeze flow paradox is, um, something that will be further explained. Uh, now setting those two equal gives critical yield stress. The tau y criticals-- uh, the tau y critical equals 3fh over s-- uh, fhc over 2 pi r die cube. So our-- for our GPU configuration with f equal to 400 Newtons, that is 2.8 kilopascals, 
+The Bingham squeeze flow paradox is, um, something that will be further explained. now setting those two equal gives critical yield stress. The tau y critical , the tau y critical equals 3fh over s--, fhc over 2 pi r die cube. So our-- for our GPU configuration with f equal to 400 Newtons, that is 2.8 kilopascals, 
 
 00:05:12,420 --> 00:05:24,740 [Avanika]
-we're able to derive at a, a critical height, uh, bond line thickness, and a critical radius for which we are able to, um, simulate the Bingham flow diagrams. 
+we're able to derive at a, a critical height, bond line thickness, and a critical radius for which we are able to, um, simulate the Bingham flow diagrams. 
 
 00:05:29,360 --> 00:05:38,140 [Avanika]
 These two ideas make these models trustworthy. The first is the Bingham paradox of Lipscomb and Dunn. Like, a rigid plug cannot exist, 
@@ -331,7 +331,7 @@ And the second idea is dimensional analysis. With seven variables and three base
 10 times below the lubrication limit, and the Reynolds number stays between 10 to the minus 12 and 10 to the minus 5. 
 
 00:06:46,960 --> 00:07:16,320 [Yaswitha]
-Uh, here the Bingham number diverges as the paste approaches its stall. And finally, the thermal coupling. With the paste radius and gap known, the die splits into a covered core and an air in parallel, air annulus in parallel, like giving an effective resistance and a die average temperature rise. So the uncovered rim also sees as a local one-dimensional air gap penalty, 
+here the Bingham number diverges as the paste approaches its stall. And finally, the thermal coupling. With the paste radius and gap known, the die splits into a covered core and an air in parallel, air annulus in parallel, like giving an effective resistance and a die average temperature rise. So the uncovered rim also sees as a local one-dimensional air gap penalty, 
 
 00:07:17,560 --> 00:07:27,440 [Yaswitha]
 Q double prime times H over K air, K of the air. This uses Fourier's law and the same one-dimensional argument you saw in the lab. 
@@ -345,22 +345,22 @@ Moving on to the results, the setup shared by all five GPU trajectories. The die
 Conductivities are 5 and 0.026. The Newtonian paste reaches the die edge at about 5 se- 5.2 seconds, the shear thickening paste at about 12 seconds, and after that, each follows its phase ruler. So Avnika will now walk through the results. 
 
 00:08:42,020 --> 00:08:44,480 [Avanika]
-Uh, let us look at the results starting with the profiles. 
+let us look at the results starting with the profiles. 
 
 00:08:54,600 --> 00:09:22,800 [Avanika]
-Now, uh, at the same flux, we observe that the Newtonian paste peaks at 1.5 times the mean velocity. The shear thinning index of 0.4 gives 1.286. A blunter core and a shear thickening index of 1.3 gives 1.565, a sharper peak. The Bingham profile with a plug fraction of one-half has a completely flat center zone, while the stress profile is the same straight line for all of them. Now, moving on to the figure 3. 
+Now, at the same flux, we observe that the Newtonian paste peaks at 1.5 times the mean velocity. The shear thinning index of 0.4 gives 1.286. A blunter core and a shear thickening index of 1.3 gives 1.565, a sharper peak. The Bingham profile with a plug fraction of one-half has a completely flat center zone, while the stress profile is the same straight line for all of them. Now, moving on to the figure 3. 
 
 00:09:27,280 --> 00:10:46,920 [Avanika]
-Figure 3 will show us about the bondline trajectories on the GPU die. During phase 1, the curves follow the predicted slopes and steepen at the gap thickness of 61 micrometers. After 60 seconds under 400 newtons, the shear thinning paste reaches about 10.8 micrometers and a temperature drop, drop of 1.85 Kelvin. The Newtonian reference reaches 24.6 micrometers, 4.2 Kelvin, and the shear thickening paste reaches about 33 micrometers and 5.7 Kelvin. The shear thinning therefore cuts the temperature drop by about 56% versus the Newtonian, while the thickening makes it about third worse. All of these cover 100% of the die. The Bingham results are where the physics meets reality. With a yield stress of 250 Pascals below the critical 2.8 kiloPascals, the paste is covering the entire die and heads for the area-limited stall of 5.5 micrometers, though at 60 seconds, it is still about, uh, 27 micrometers thick, always thicker than the Newtonian because the yield stress is only adding to the resistance. Now, if we raise the yield stress to 5 kiloPascals, uh, around which would be twice as much, a heavily loaded paste, everything changes. We can see in the figure that the pressure over the die at 60 seconds, 
+Figure 3 will show us about the bondline trajectories on the GPU die. During phase 1, the curves follow the predicted slopes and steepen at the gap thickness of 61 micrometers. After 60 seconds under 400 newtons, the shear thinning paste reaches about 10.8 micrometers and a temperature drop, drop of 1.85 Kelvin. The Newtonian reference reaches 24.6 micrometers, 4.2 Kelvin, and the shear thickening paste reaches about 33 micrometers and 5.7 Kelvin. The shear thinning therefore cuts the temperature drop by about 56% versus the Newtonian, while the thickening makes it about third worse. All of these cover 100% of the die. The Bingham results are where the physics meets reality. With a yield stress of 250 Pascals below the critical 2.8 kiloPascals, the paste is covering the entire die and heads for the area-limited stall of 5.5 micrometers, though at 60 seconds, it is still about,  27 micrometers thick, always thicker than the Newtonian because the yield stress is only adding to the resistance. Now, if we raise the yield stress to 5 kiloPascals,  around which would be twice as much, a heavily loaded paste, everything changes. We can see in the figure that the pressure over the die at 60 seconds, 
 
 00:10:48,900 --> 00:11:35,300 [Avanika]
-uh, the pressure at 60 seconds is like the paste stalls at 77.3 micrometers with a wetted radius of 14.35 millimeters, and that is only about 79% of the die, leaving a bare silicon ring, which leaves a air annulus, and that is where our thermal bottleneck comes. So thermally, the parallel network makes the temperature drop jump to about 16.7 Kelvin, and the local one-dimensional air gap estimate at the rim is around, uh, 2,000 Kelvin. Treat the number like as an indicator of severity because this lateral spreading in the die and lid would reduce it. But it tells us that the throttling threshold would be crossed, and, uh, that is where our har- hardware bottleneck comes into play. Now, let's take a quick look at figure 5. 
+ the pressure at 60 seconds is like the paste stalls at 77.3 micrometers with a wetted radius of 14.35 millimeters, and that is only about 79% of the die, leaving a bare silicon ring, which leaves a air annulus, and that is where our thermal bottleneck comes. So thermally, the parallel network makes the temperature drop jump to about 16.7 Kelvin, and the local one-dimensional air gap estimate at the rim is around,2,000 Kelvin. Treat the number like as an indicator of severity because this lateral spreading in the die and lid would reduce it. But it tells us that the throttling threshold would be crossed, and, that is where our har- hardware bottleneck comes into play. Now, let's take a quick look at figure 5. 
 
 00:11:38,340 --> 00:11:40,560 [Avanika]
 So this is a GPU thermal design map, 
 
 00:11:41,740 --> 00:11:59,280 [Avanika]
-so with both the Bingham design as well as the power law design space. So here we make it into a design map. The yield stress against clamp force with a white critical locus, uh, which we express in the line, as well as, um, we've also made a partial coverage stall. The figure 4 
+so with both the Bingham design as well as the power law design space. So here we make it into a design map. The yield stress against clamp force with a white critical locus, which we express in the line, as well as, um, we've also made a partial coverage stall. The figure 4 
 
 00:12:00,620 --> 00:12:01,660 [Avanika]
 will tell us about 
@@ -372,13 +372,13 @@ the club morph-- the plug morphology.
 So this is a Bingham plug map. 
 
 00:12:11,468 --> 00:12:19,108 [Avanika]
-So a full gap plug at the axis that thin towards the rim, and the master curves for the plug fraction and, uh, the phi of lambda. 
+So a full gap plug at the axis that thin towards the rim, and the master curves for the plug fraction and,the phi of lambda. 
 
 00:12:21,368 --> 00:12:24,628 [Avanika]
 Over to Yashwitha to talk about how to interpret these results. 
 
 00:12:25,728 --> 00:12:46,368 [Yaswitha]
-Okay. Uh, let us translate these results into engineering decisions for packaging. First, shear thinning is an advantage. So a paste with n around 0.4 to 0.6 flows fast under, under the initial clamp and requires high viscosity at rest. [clears throat] So it thins quickly without pumping out later. 
+Okay. let us translate these results into engineering decisions for packaging. First, shear thinning is an advantage. So a paste with n around 0.4 to 0.6 flows fast under, under the initial clamp and requires high viscosity at rest. [clears throat] So it thins quickly without pumping out later. 
 
 00:12:48,668 --> 00:13:13,988 [Yaswitha]
 Second, yield stress sets a hard stall limit. Increasing filler loading to raise conductivity raises, raises the tau y, and once tau y exceeds the critical value for the clamp force and dispense volume, the paste stalls before reaching the die edge. So the air then costs far more than any gain in bulk conductivity. So the, 
@@ -446,58 +446,58 @@ Now, Avanika will now close with the limitations and conclusions.
 
 ### Section 7
 00:00:00,480 --> 00:00:23,040 [Avanika]
-Um, so for the final part, let's start with a wrap-up. And, uh, so w- the final implementations and the further extension of this, uh, the further scope of this project can be working with AI and being able to simulate these work, uh, simulate these fluid flows in real time. So we have asked AI to done-- do that, and this, these, there are two AI-rendered flows, which is, which you can see on the, 
+Um, so for the final part, let's start with a wrap-up. And,  so w- the final implementations and the further extension of this,  the further scope of this project can be working with AI and being able to simulate these fluid flows in real time. So we have asked AI to done-- do that, and this, these, there are two AI-rendered flows, which is, which you can see on the, 
 
 00:00:24,460 --> 00:00:36,540 [Avanika]
-um, repository. So we have AI-rendered simulations, both of which are runnable, but, uh, we haven't been, uh... So for further scope of this project can be working with AI and being able to verify them, um, 
+um, repository. So we have AI-rendered simulations, both of which are runnable. So for further scope of this project can be working with AI and being able to verify them, um, 
 
 00:00:37,820 --> 00:01:01,960 [Avanika]
-and so that we can actually visualize these fluid flows in real time. Now, moving on to what our project's, uh, final, um, like what are the assumptions we're making and what are the parts that we're leaving out? So one thing we've modeled is a Newtonian flow, which gives us a clean baseline, but it's never being able to address the flow. It is something that it, it just keeps running and, uh, as like indefinitely with time, 
+and so that we can actually visualize these fluid flows in real time. Now, moving on to what our project's, final, um, like what are the assumptions we're making and what are the parts that we're leaving out? So one thing we've modeled is a Newtonian flow, which gives us a clean baseline, but it's never being able to address the flow. It is something that it, it just keeps running and, as like indefinitely with time, 
 
 00:01:03,200 --> 00:01:28,400 [Avanika]
-uh, which is also, um, yeah, the pace keeps staying indefinitely with time. The second, uh, fluid flow that we discovered was the shear thinning under the power law, uh, where it captures the viscosity dropping under high stress, uh, high shear rates, yet it has no yield stress, bec- meaning it starts flowing even under a tiny supplied force. Then when we talk about the Bingham flow diagram, uh, the... 
+which is also, um, yeah, the pace keeps staying indefinitely with time. The second, fluid flow that we discovered was the shear thinning under the power law,  where it captures the viscosity dropping under high stress,  high shear rates, yet it has no yield stress, bec- meaning it starts flowing even under a tiny supplied force. Then when we talk about the Bingham flow diagram,  the... 
 
 00:01:29,760 --> 00:03:31,300 [Avanika]
-what do we understand from that is like we're able to introduce a yield stress, we're able to put in a rest condition, but there is again a fallback where there is, uh, no shear thinning above the yield, and once yield is ex- exceeded, the stress scales linearly with the shear rate. So with these, uh, three models, if you want to, uh, model real, real-time, uh, real-life, uh, TIMs, we realize that we need to kind of co- come to a, a trade-off point between these two models. So we, in reality, these TIMs exhibit both the yield behavior as well as the shear thinning behavior, and, uh, we try to bring in this Herschel-Bulkley model, which basically, uh, introduces tau equal to tau y plus K, uh, shear rate to the power n. Now, the good news about our mod- di-modular approach or bimodal approach is that, uh, with the, because of the modularity, we're able to directly implement this Herschel-Bulkley model, uh, where it's able to get into, it's able to being implemented in our existing framework. And all we have to do is just change the stress law, the constitutive law, uh, without requiring to change anything about the conservation equations. And, um, what are the, uh, what, what can we, what... So when we talk about the, uh, how much we're able to model and how much we're not able to model, we weren't able to model the, we weren't able to account for certain real-life aspects such as, uh, filler jamming at the minimum bond line thickness because the solid particles halt thinning regardless of the pressure, and temperature-dependent viscosity wasn't being able to... We weren't, we didn't implement a temperature-dependent viscosity because it will change, uh, both the assembly and the operation. And, uh, geometric, uh, asymmetries weren't accounted for because, uh, we could have a die or a heat sink tilt and off-center paste dispensing, and we didn't account for thermal, uh, contact resistance at the interface, um, where we can... as well as like the air voids and the pump-out, which is driven by repeated thermal cycling. And we also didn't account for lateral heat spreading. So one, 
+what do we understand from that is like we're able to introduce a yield stress, we're able to put in a rest condition, but there is again a fallback where there is, no shear thinning above the yield, and once yield is ex- exceeded, the stress scales linearly with the shear rate. So with these, three models, if you want to  model real,  real-life,  TIMs, we realize that we need to kind of co- come to a, a trade-off point between these two models. So we, in reality, these TIMs exhibit both the yield behavior as well as the shear thinning behavior, and,  we try to bring in this Herschel-Bulkley model, which basically,  introduces tau equal to tau y plus K,  shear rate to the power n. Now, the good news about our mod- di-modular approach or bimodal approach is that, with the, because of the modularity, we're able to directly implement this Herschel-Bulkley model,  where it's able to get into, it's able to being implemented in our existing framework. And all we have to do is just change the stress law, the constitutive law, without requiring to change anything about the conservation equations. And, um, what are the, what, what can we, what... So when we talk about the, how much we're able to model and how much we're not able to model, we weren't able to model the, we weren't able to account for certain real-life aspects such as filler jamming at the minimum bond line thickness because the solid particles halt thinning regardless of the pressure, and temperature-dependent viscosity wasn't being able to... We weren't, we didn't implement a temperature-dependent viscosity because it will change, both the assembly and the operation. And,  geometric,  asymmetries weren't accounted for because,  we could have a die or a heat sink tilt and off-center paste dispensing, and we didn't account for thermal, contact resistance at the interface, um, where we can... as well as like the air voids and the pump-out, which is driven by repeated thermal cycling. And we also didn't account for lateral heat spreading. So one, 
 
 00:03:32,740 --> 00:03:39,420 [Avanika]
-uh, so we just applied a one-dimensional hotspot treatment, which was neglecting, uh, lateral heat spread. 
+so we just applied a one-dimensional hotspot treatment, which was neglecting, lateral heat spread. 
 
 00:03:40,440 --> 00:04:25,840 [Avanika]
-Uh, what is, uh, for, like, what can we do to model real-life TIMs is, uh, uh, like we need to, like, we need to have a experimental rheology, and we need to get parameters from these measurements rather than just solely, uh, uh, relying on, uh, assumed parameters. So what are the things that we could extract is the consistency index K, the flow behavior n, and the yield stress tau. So all of these quantities can be, uh, ex- can be extracted. And having measured parameters grounds the model in real material behavior and show how closely the different commercial or lab formulation match these idealized closures. And, uh, we can develop a model which can, uh, exactly model real-life TIMs. 
+ what is, , for, like, what can we do to model real-life TIMs is,  like we need to, like, we need to have a experimental rheology, and we need to get parameters from these measurements rather than just solely,  relying on assumed parameters. So what are the things that we could extract is the consistency index K, the flow behavior n, and the yield stress tau. So all of these quantities can be extracted. And having measured parameters grounds the model in real material behavior and show how closely the different commercial or lab formulation match these idealized closures. And, we can develop a model which can exactly model real-life TIMs. 
 
 00:04:26,980 --> 00:04:27,980 [Avanika]
 Um, moving on to, 
 
 00:04:29,480 --> 00:05:06,540 [Avanika]
-uh, we can progressively, like, layer the real-world physics by coupling viscosity to temperature, so local heating fee- local heating feeds back into the flow resistance and the thinning dynamics. We can account for the minimum bond line limits, the filler jamming, and the non-ideal geometry that we just discussed about. And, uh, yeah, we can extend it to the thermal side beyond the 1D hotspot. We can incorporate lateral spreading. We can also talk about long-term degradation mechanisms, which usually, uh, happen in real-life hardware chips, where there is voiding or there's some pump-out under thermal cycling. So in real-life chips, uh, one major, uh, 
+, we can progressively, like, layer the real-world physics by coupling viscosity to temperature, so local heating fee- local heating feeds back into the flow resistance and the thinning dynamics. We can account for the minimum bond line limits, the filler jamming, and the non-ideal geometry that we just discussed about. And, yeah, we can extend it to the thermal side beyond the 1D hotspot. We can incorporate lateral spreading. We can also talk about long-term degradation mechanisms, which usually,  happen in real-life hardware chips, where there is voiding or there's some pump-out under thermal cycling. So in real-life chips, one major, 
 
 00:05:07,680 --> 00:05:23,940 [Avanika]
-bottleneck is basically that it's not just a temperature being uniformly applied, but rather the die is undergoing heating, a constant loop of, uh, heating and cooling cycles. So it has to account for that. There will be degradation mechanisms, and we can extend this model to account for those too. 
+bottleneck is basically that it's not just a temperature being uniformly applied, but rather the die is undergoing heating, a constant loop of heating and cooling cycles. So it has to account for that. There will be degradation mechanisms, and we can extend this model to account for those too. 
 
 00:05:25,400 --> 00:06:34,204 [Avanika]
-And finally, uh, what can we do for this model is we can, we can have direct experimental validation, where we can compare the model-predicted bond line thickness and the thermal rises against physical measurements on text fixtures and hardware. Uh, right now, we state openly that our results are validated for internal consistency and the limiting cases. It is not yet against a physical, uh, TIM sample. And closing that gap is a milestone that turns this framework from a verified mathematical model into a validated design tool, and that increases the scope and the application of this project. Uh, now, what were we able to achieve and what were the three questions that we kept asking ourselves is, how thick is the layer? How long does it take for this to, um... Thin out to a specific bond line thickness. So we realized that the Newtonian paste thins as T power minus 1 by 4 and T power minus 1 by 2 without ever coming to a complete stop. The shear thinning is able to accelerate the thinning process. And in contrast to this, the yield stress arrests the flow at finite bond line, um, uh, thickness, which we derived as a critical bond line thickness using the Bingham model. And, 
+And finally, what can we do for this model is we can, we can have direct experimental validation, where we can compare the model-predicted bond line thickness and the thermal rises against physical measurements on text fixtures and hardware.  right now, we state openly that our results are validated for internal consistency and the limiting cases. It is not yet against a physical,  TIM sample. And closing that gap is a milestone that turns this framework from a verified mathematical model into a validated design tool, and that increases the scope and the application of this project. now, what were we able to achieve and what were the three questions that we kept asking ourselves is, how thick is the layer? How long does it take for this to, um... Thin out to a specific bond line thickness. So we realized that the Newtonian paste thins as T power minus 1 by 4 and T power minus 1 by 2 without ever coming to a complete stop. The shear thinning is able to accelerate the thinning process. And in contrast to this, the yield stress arrests the flow at finite bond line, um,  thickness, which we derived as a critical bond line thickness using the Bingham model. And, 
 
 00:06:35,784 --> 00:07:15,884 [Avanika]
-um, we also have to... Another question was like, how many, uh, temp- how much was the temperature drop? Were we able to get some significant figures is yes. So with our benchmark of 700-watt GPU reference case, the difference is dramatic. Were we able to saw around, uh, 1.85 Kelvin for a well-behaved shear-thin paste, and for a Bingham paste, that was about 16.7 Kelvin, which is a huge difference. And that is why we were able to, uh, visually see how these models could affect something as important as a temperature rise, which is the where the entire thermal bottleneck is being addressed, and thermal throttling, as introduced in the, as introduced in the beginning. 
+um, we also have to... Another question was like, how many,  temp- how much was the temperature drop? Were we able to get some significant figures is yes. So with our benchmark of 700-watt GPU reference case, the difference is dramatic. Were we able to saw around,  1.85 Kelvin for a well-behaved shear-thin paste, and for a Bingham paste, that was about 16.7 Kelvin, which is a huge difference. And that is why we were able to,  visually see how these models could affect something as important as a temperature rise, which is the where the entire thermal bottleneck is being addressed, and thermal throttling, as introduced in the, as introduced in the beginning. 
 
 00:07:17,164 --> 00:07:40,884 [Avanika]
-Um, and how far, like, what are our assumptions? Are our assumptions even useful when it comes to, um, application is yes. We did take, uh, uh, more assumptions because we wanted to model something simple, but somewhere along the way, the mathematics did get a lot complicated. Uh, but however, verifications all passed. We have 20 verification tests which is being run in the repository, 
+Um, and how far, like, what are our assumptions? Are our assumptions even useful when it comes to, um, application is yes. We did take,  more assumptions because we wanted to model something simple, but somewhere along the way, the mathematics did get a lot complicated. but however, verifications all passed. We have 20 verification tests which is being run in the repository, 
 
 00:07:42,424 --> 00:07:45,724 [Avanika]
-uh, under the non-Newtonian model I worked on. So we can, 
+ under the non-Newtonian model I worked on. So we can, 
 
 00:07:46,984 --> 00:07:52,784 [Avanika]
-uh... So all this has a workflow which verifies all these physics, and we're able to, um, 
+ So all this has a workflow which verifies all these physics, and we're able to, um, 
 
 00:07:54,184 --> 00:08:56,004 [Avanika]
-get standard results out of them. So there we go when it comes to the verification. So our model is solid when it comes to, uh, whether the assumptions hold and what are the margins for them, all defined in the report. Uh, finally, we have to talk about what, how did transport phenomena shape this project, uh, uh, entirely. It's because conservation laws are universal, and these closures are material-specific. We were able to model different closures for one particular fluid, which is the thermal paste, and, uh, combining the single continuity flux, a linear stress balance, and we had three different flow closures. Like, the overall, the overlying thermal network gives us an end-to-end chain, like which starts from the clamp force to the junction temperature. And one important design rule that we learned is that whatever it is, the paste yield stress should be below the critical threshold, and that way we can favor the thinning, uh, the shear thinning behavior, and we can, uh, effectively thin the material under the load without stalling it prematurely. 
+get standard results out of them. So there we go when it comes to the verification. So our model is solid when it comes to,  whether the assumptions hold and what are the margins for them, all defined in the report.  finally, we have to talk about what, how did transport phenomena shape this project,  entirely. It's because conservation laws are universal, and these closures are material-specific. We were able to model different closures for one particular fluid, which is the thermal paste, and,  combining the single continuity flux, a linear stress balance, and we had three different flow closures. Like, the overall, the overlying thermal network gives us an end-to-end chain, like which starts from the clamp force to the junction temperature. And one important design rule that we learned is that whatever it is, the paste yield stress should be below the critical threshold, and that way we can favor the thinning, the shear thinning behavior, and we can,  effectively thin the material under the load without stalling it prematurely. 
 
 00:08:57,124 --> 00:09:44,504 [Avanika]
-So we work with all these laws to just model that critical, uh, yield stress, and that is all the model is. So this has been a very, uh, informative as well as, uh, a thorough learning process where we learned how we can shift these abstract physical equations from the transport phenomena course into addressing a real-life, uh, problem, which is the thermal bottlenecks in the chips. And we also realized there's so much scope to this. Just by modeling these, uh, diagrams and simulating them, we realized how far we can actually not just simulate these problems, but also be able to solve them one day through these simulations themselves. And all of this just from knowing these underlying physics equations and these laws which shape these, um, fluid flows. So yeah, thank you for the opportunity, 
+So we work with all these laws to just model that critical yield stress, and that is all the model is. So this has been a very informative as well as a thorough learning process where we learned how we can shift these abstract physical equations from the transport phenomena course into addressing a real-life problem, which is the thermal bottlenecks in the chips. And we also realized there's so much scope to this. Just by modeling these, diagrams and simulating them, we realized how far we can actually not just simulate these problems, but also be able to solve them one day through these simulations themselves. And all of this just from knowing these underlying physics equations and these laws which shape these, um, fluid flows. So yeah, thank you for the opportunity, 
 
 00:09:45,584 --> 00:09:51,104 [Avanika]
-and, uh, we can... The, the results are reproducible through the repository. Thank you.
+the results are reproducible through the repository. Thank you.
 
 
 
