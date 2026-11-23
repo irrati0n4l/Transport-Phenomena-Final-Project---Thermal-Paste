@@ -102,7 +102,7 @@ jupyter lab squeeze_flow_tim.ipynb
 ### Step 4 — Read the Technical Report (`report.md` & `non_newtonian.pdf`)
 Review the complete mathematical derivations, governing equations, rheological closure proofs, and thermal bottleneck analysis in either format:
 - **Markdown Source:** [`report/report.md`](report/report.md) — Editable manuscript with LaTeX equations and inline figures.
-- **Compiled PDF:** [`report/non_newtonian.pdf`](report/non_newtonian.pdf) — Typeset, publication-ready report for offline reading.### Step 4 — Editable (markdown) and compiled pdf  (`report/report.md`) 
+- **Compiled PDF:** [`report/non_newtonian.pdf`](report/non_newtonian.pdf) — Typeset, publication-ready report for offline reading.
 
 
 
@@ -112,7 +112,7 @@ Review the complete mathematical derivations, governing equations, rheological c
 
 | Figure | Physical Focus | Preview |
 |---|---|---|
-| **Figure 1** | Cross-gap velocity profiles $u_r(z)/\bar{u}_r$ & universal linear shear stress $\tau_{rz}(z)/\tau_w$ | ![Fig 1](figures/fig1_velocity_stress.png) |
+| **Figure 1** | Cross-gap velocity profiles *u*<sub>*r*</sub>(*z*)/*ū*<sub>*r*</sub> & universal linear shear stress *τ*<sub>*rz*</sub>(*z*)/*τ*<sub>*w*</sub> | ![Fig 1](figures/fig1_velocity_stress.png) |
 | **Figure 2** | Normalized radial pressure $(p-p_\infty)/p_{\text{ref}}$ & 700 W GPU die coverage at $t = 60\text{ s}$ | ![Fig 2](figures/fig2_pressure_coverage.png) |
 | **Figure 3** | Log–log bondline thinning $h(t)$, Phase 1 $\to$ Phase 2 transition at $h_c = 61.43\,\mu\text{m}$, & $\Delta T_{\text{TIM}}(t)$ | ![Fig 3](figures/fig3_thickness_radius.png) |
 | **Figure 4** | 2D Bingham pseudo-plug morphology $\|z - h/2\| \le z_0(r)$ & master curves $\xi_0(S), \Phi(\Lambda)$ | ![Fig 4](figures/fig4_bingham_plug_map.png) |
