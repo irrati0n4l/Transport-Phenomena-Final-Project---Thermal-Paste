@@ -393,6 +393,56 @@ Newtons. So either formulate with dispersants to keep tau y below about 500 pasc
 And the Newtonian lab supports the same lesson, like coverage and gap, not just conductivity, set the temperature drop. The thermal resistance of the bond line follows the same ordering, about 0.0062 Kelvin per watt for the shear thinning paste and 0.006 Kelvin per watt for the Newtonian, and about 0.008 for shear thickening and 0.00024 for the stalled Bingham paste, like almost 10 times worse than the shear thinning case.
 
 ### Section 6
+00:00:00,840 --> 00:00:09,220 [Yaswitha]
+Moving to the checks and validation, we built an automated suite of 20 tests implementing the seven-point checklist, and every check passes. 
+
+00:00:10,300 --> 00:00:16,560 [Yaswitha]
+Coming to the limiting cases, the power law with N equal to 1 reproduces the stefan's solution, 
+
+00:00:17,900 --> 00:00:32,659 [Yaswitha]
+4 times into 10 to the power minus 16. The Bingham model with yield stress tending to 0 reproduces Newtonian to 7 times into 10 to the power minus 6, and the thermal network reproduces the full paste and all air limits. 
+
+00:00:34,040 --> 00:01:11,120 [Yaswitha]
+Coming to the stall checks, the long time thickness reaches the predicted values, and the static force at the stall point equals 400 newtons to the machine precision. Conservation, volume is conserved. The pressure integral equals the clamp force, and the radial flux equals r W over 2 at every radius and rheology. The last two, 10 to the 10 to the power minus 14 consecutive checks. Stress stays below yield inside the plug. The plug velocity is flat, and the cubic root is exact. 
+
+00:01:13,300 --> 00:01:18,980 [Yaswitha]
+Coming to the remaining checks,  the remaining checks target scaling and units. 
+
+00:01:20,120 --> 00:01:27,720 [Yaswitha]
+The checks 11 to the 13 fit the late-time slope of each trajectory against the predicted exponent, 
+
+00:01:29,840 --> 00:01:41,300 [Yaswitha]
+minus 2 and over 3N plus 5 for N equal to 1.5 and 1.3 with errors below 3 times 10 to the minus 10. 
+
+00:01:42,580 --> 00:01:52,160 [Yaswitha]
+Check 14 rescales the base units of mass, length, and time arbitrarily and confirms the gap history is invariant, which is dimensional homogeneity. 
+
+00:01:53,600 --> 00:02:05,740 [Yaswitha]
+And we also cross-check the two components against each other. The Newtonian lab and the power law model share the stiffened limit, so the gap laws agree at N equal to 1. 
+
+00:02:08,699 --> 00:02:31,800 [Yaswitha]
+And while preparing this video, we rederived every headline number. We found one real mistake in our earlier draft. The critical yield stress had been quoted as 1.38 kilopascals, but the correct value from our own stall equations is 2.8 kilopascals, a missing factor of pi. We also reran the 60-second 
+
+00:02:32,860 --> 00:02:49,420 [Yaswitha]
+table for the shear thickening and low-yield Bingham pastes, and the values you heard are the corrected ones. That is the point of verification. It catches us before the physics does. Like, each test has an explicit tolerance, and none was loosened to make it pass. 
+
+00:02:52,200 --> 00:03:04,760 [Yaswitha]
+Finally, we audited our physical assumptions against reality across all five trajectories, shown here in Figure 6 on the page 18. On the left panel, the geometric aspect ratio epsilon, 
+
+00:03:05,840 --> 00:03:10,200 [Yaswitha]
+that is H over R, stays between 10 power minus 3 and 10 power minus 2. 
+
+00:03:11,320 --> 00:03:20,780 [Yaswitha]
+Well, below the 0.1 lubrication breakdown line, right below it, the squeezed Reynolds number stays between 10 power minus 12 and 10 power minus 5, 
+
+00:03:22,080 --> 00:03:37,380 [Yaswitha]
+confirming creeping flow with negligible inertia. On the right panel, the Bingham number cleanly tracks the crossover from viscous-dominated squeeze to plastic stall divergence as H approaches the H star. 
+
+00:03:38,960 --> 00:04:01,060 [Yaswitha]
+And we also checked neglected effects in the Newtonian lab. Gravity contributes only about 2 and a half pascals against 10, tens of kilopascals applied. And compressibility at a 2 kilo- gigapascal bulk modulus shifts the final gap by just 1.6 into 10 power minus 15. 
+
+00:04:06,400 --> 00:04:10,200 [Yaswitha]
+Now, Avanika will now close with the limitations and conclusions.
 
 ### Section 7
 00:00:00,480 --> 00:00:23,040 [Avanika]
