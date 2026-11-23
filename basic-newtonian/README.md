@@ -3,6 +3,8 @@
 *From a throttling processor to a film of paste: a journey through force, flow and heat, rebuilt from the basics of the course*
 
 > Markdown reconstruction of the original PDF. Text is extracted page-wise; original embedded visual assets are included where extractable.
+[https://htmlpreview.github.io/](https://htmlpreview.github.io/)?
+https://github.com/irrati0n4l/Transport-Phenomena-Final-Project---Thermal-Paste/blob/main/basic-newtonian/source.html
 
 ---
 
