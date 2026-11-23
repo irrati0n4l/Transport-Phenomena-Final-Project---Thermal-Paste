@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TIM Squeeze-Flow &amp; GPU Thermal Bottleneck Lab</title>
+<style>
+:root{--bg:#14181f;--pn:#1b212b;--pn2:#222a36;--ln:#303a49;--tx:#d8dde6;--mu:#8b96a8;--N:#6fa8a0;--P:#a893bd;--B:#cba765;--hot:#c9705a;--ok:#82ae8c;--warn:#d1a85a;
+color-scheme:dark}
+@media (prefers-color-scheme:light){:root{--bg:#eceff3;--pn:#fff;--pn2:#f3f5f8;--ln:#cdd4de;--tx:#1f2733;--mu:#5d6878;--N:#3f8077;--P:#7d65a0;--B:#9c7a2e;--hot:#b4533d;--ok:#4d8a5b;--warn:#a67c1f;color-scheme:light}}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+header{padding:16px 22px 6px}h1{margin:0;font-size:20px;font-weight:650}header p{margin:2px 0 0;color:var(--mu);font-size:13px}
+.app{display:grid;grid-template-columns:292px minmax(0,1fr) 300px;gap:14px;padding:12px 22px 28px;max-width:1650px;margin:auto}
+@media(max-width:1250px){.app{grid-template-columns:292px 1fr}.app>.r{grid-column:1/-1}}
+@media(max-width:800px){.app{grid-template-columns:1fr;padding:10px}}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.c{background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:12px 14px}
+h3{margin:0 0 8px;font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mu);font-weight:600}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+button{background:var(--pn2);color:var(--tx);border:1px solid var(--ln);border-radius:8px;padding:6px 10px;font:inherit;font-size:12.5px;cursor:pointer}
+button:hover{border-color:var(--mu)}button.on{border-color:var(--ac,var(--N));box-shadow:inset 0 0 0 1px var(--ac,var(--N));color:var(--ac,var(--N))}
+.sc{display:grid;gap:5px;width:100%}.sc button{text-align:left;display:flex;justify-content:space-between}
+.sl{margin:7px 0}.sl label{display:flex;justify-content:space-between;font-size:12px;color:var(--mu)}.sl b{color:var(--tx);font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--N);margin:3px 0 0}
+canvas{width:100%;display:block;border-radius:8px;background:var(--pn2)}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:8px}.t{background:var(--pn2);border-radius:8px;padding:7px 9px}
+.t i{display:block;font-style:normal;font-size:10.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em}.t b{font-size:16px;font-variant-numeric:tabular-nums;font-weight:600}
+.bar{position:relative;height:16px;border-radius:8px;background:linear-gradient(90deg,#3d5f73,#6a9a8c 35%,#c4ae6d 60%,#c9705a 85%,#8f3f3f);margin:12px 0 22px}
+.bar span{position:absolute;top:-4px;width:2px;height:24px;background:var(--tx)}.bar em{position:absolute;top:21px;font-size:10px;font-style:normal;color:var(--mu);transform:translateX(-50%);white-space:nowrap}
+.st{padding:8px 10px;border-radius:8px;font-size:12.5px;border:1px solid var(--ln);margin-top:6px}
+table{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}th,td{padding:5px 7px;border-bottom:1px solid var(--ln);text-align:right}th:first-child,td:first-child{text-align:left}th{color:var(--mu);font-weight:600;font-size:11px}
+.wrap{overflow-x:auto}.ok{color:var(--ok)}.bad{color:var(--hot)}.mu{color:var(--mu);font-size:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:800px){.two{grid-template-columns:1fr}}
+.ck{display:grid;grid-template-columns:auto 1fr;gap:3px 8px;font-size:12.5px}
+</style></head><body>
+<header><h1>TIM Squeeze-Flow &amp; GPU Thermal Bottleneck Lab</h1><p>Constant-force, constant-volume squeeze flow of Newtonian, power-law and Bingham pastes between a 700 W AI die and a cold plate, coupled to a die-level thermal solve and a throttling model.</p></header>
+<div class="app">
+<div class="col">
+ <div class="c"><h3>README scenarios (t = 60 s)</h3><div class="sc" id="sc"></div></div>
+ <div class="c"><h3>Parameters</h3><div id="sl"></div></div>
+ <div class="c"><h3>Playback</h3><div class="btns"><button id="play">Pause</button><button id="rst">Re-clamp</button></div>
+  <div class="sl"><label>Time (log) <b id="tv"></b></label><input id="ts" type="range" min="0" max="1000" value="0"></div></div>
+</div>
+<div class="col">
+ <div class="c"><h3>Cross-section &middot; paste velocity (colour) &amp; Bingham plug (dashed)</h3><canvas id="cs" height="270"></canvas></div>
+ <div class="c"><h3>Die temperature map &middot; top view (equivalent-disk die, 2-D lateral spreading in Si)</h3><canvas id="tm" height="360"></canvas></div>
+ <div class="two"><div class="c"><h3>Bondline h(t)</h3><canvas id="c1" height="190"></canvas></div><div class="c"><h3>Mean TIM &Delta;T(t)</h3><canvas id="c2" height="190"></canvas></div></div>
+</div>
+<div class="col r">
+ <div class="c"><h3>Thermal bottleneck &middot; <span id="mn"></span></h3><div class="bar" id="bar"></div><div class="st" id="stat"></div></div>
+ <div class="c"><h3>Live telemetry</h3><div class="g" id="g"></div></div>
+</div>
+</div>
+<div class="app" style="padding-top:0;grid-template-columns:1fr 1fr">
+ <div class="c wrap" style="grid-column:1/-1"><h3>Benchmark: simulator vs README (F₀ 400 N, V₀ 50 mm³, h₀ 1 mm, μ=K=100, k 5, Q 700 W, t = 60 s)</h3><table id="bt"></table>
+ <p class="mu">ΔT<sub>hot</sub> is the README's 1-D, no-lateral-spreading bound q″·h/k<sub>air</sub>. The map above resolves silicon spreading, so its peak is far lower; both are shown on purpose.</p></div>
+ <div class="c" style="grid-column:1/-1"><h3>Automated verification &middot; <span id="vs"></span></h3><div class="ck" id="ck"></div></div>
+</div>
+<script>
+"use strict";
+//ENGINE
+const PI=Math.PI,D={A:814e-6,ka:.026,Tc:45,ksi:120,tsi:.78e-3,Tlim:85,Tsd:105,h0:1e-3,TM:60};D.Rd=Math.sqrt(D.A/PI);
+const Cn=n=>Math.pow((2*n+1)/n,n),Rof=(p,h)=>Math.min(Math.sqrt(p.V/(PI*h)),D.Rd);
+const plc=(p,m)=>m==='P'?{n:p.n,K:p.K}:{n:1,K:p.mu};
+function hdPL(p,h,n,K){const R=Rof(p,h);return -Math.pow(p.F*(n+3)*Math.pow(h,2*n+1)/(2*PI*K*Cn(n)*Math.pow(R,n+3)),1/n)}
+function hPL(p,t,n,K){const c=Math.pow(p.F*(n+3)/(2*PI*K*Cn(n)),1/n),a1=(3*n+5)/(2*n),b1=(n+1)/n,c1=c*Math.pow(PI/p.V,(n+3)/(2*n)),c2=c*Math.pow(D.Rd,-(n+3)/n),hc=p.V/(PI*D.Rd**2),tc=(Math.pow(hc,-a1)-Math.pow(D.h0,-a1))/(a1*c1);
+ return t<=tc?Math.pow(Math.pow(D.h0,-a1)+a1*c1*t,-1/a1):Math.pow(Math.pow(hc,-b1)+b1*c2*(t-tc),-1/b1)}
+function GB(p,r,h,hd,ty){const a=r*(-hd)/2;if(ty<=0)return 12*p.mu*a/h**3;const g0=2*ty/h;if(a<=0)return g0;const c=h**3*g0/(12*p.mu);let lo=-40,hi=0;
+ for(let i=0;i<40;i++){const m=(lo+hi)/2,x=Math.exp(m);if(c*(1-1.5*x+.5*x**3)/x-a>0)lo=m;else hi=m}return g0/Math.exp((lo+hi)/2)}
+function Gf(p,m,r,h,hd){if(m==='B')return GB(p,r,h,hd,p.ty);const{n,K}=plc(p,m);return 2*K*Cn(n)*Math.pow(r*(-hd),n)/Math.pow(h,2*n+1)}
+function Fof(p,m,h,hd,N=60){const R=Rof(p,h);let s=0;for(let i=0;i<=N;i++){const r=R*i/N,w=i==0||i==N?1:i%2?4:2;s+=w*r*r*(i?Gf(p,m,r,h,hd):0)}return PI*s*R/N/3}
+function hdB(p,h,ty=p.ty){if(ty<=0)return hdPL(p,h,1,p.mu);const R=Rof(p,h);if(p.F<=2*PI*ty*R**3/(3*h))return 0;let lo=0,hi=-hdPL(p,h,1,p.mu);
+ for(let i=0;i<30;i++){const m=(lo+hi)/2;if(Fof(p,'B',h,-m,16)<p.F)lo=m;else hi=m}return -(lo+hi)/2}
+function hStar(p,ty=p.ty){if(ty<=0)return 0;const hv=Math.pow(2*ty*Math.pow(p.V,1.5)/(3*Math.sqrt(PI)*p.F),.4);return Math.sqrt(p.V/(PI*hv))<=D.Rd?hv:2*PI*ty*D.Rd**3/(3*p.F)}
+function trajB(p){const hs=hStar(p),a=[{t:0,h:D.h0}];let h=D.h0,t=0;for(let g=0;g<2500&&t<D.TM;g++){let dh=.01*h;if(hs>0)dh=Math.min(dh,.05*(h-hs));if(dh<1e-12)break;const v=-hdB(p,h-dh/2);if(!(v>0))break;const dt=dh/v;
+ if(t+dt>=D.TM){h-=dh*(D.TM-t)/dt;t=D.TM;a.push({t,h});break}t+=dt;h-=dh;a.push({t,h})}if(a[a.length-1].t<D.TM)a.push({t:D.TM,h:a[a.length-1].h});return a}
+function mk(p,m){return m==='B'?{m,tr:trajB(p),hs:hStar(p)}:{m}}
+function stateAt(p,T,t){const m=T.m;let h;if(m==='B'){const a=T.tr;if(t<=0)h=D.h0;else if(t>=a[a.length-1].t)h=a[a.length-1].h;else{let lo=0,hi=a.length-1;while(hi-lo>1){const k=lo+hi>>1;if(a[k].t<=t)lo=k;else hi=k}h=a[lo].h+(a[hi].h-a[lo].h)*(t-a[lo].t)/(a[hi].t-a[lo].t)}}
+ else{const{n,K}=plc(p,m);h=t<=0?D.h0:hPL(p,t,n,K)}const R=Rof(p,h),hd=m==='B'?hdB(p,h):hdPL(p,h,plc(p,m).n,plc(p,m).K);return{t,h,R,hd}}
+function th1(p,h,R){const Ac=Math.min(PI*R*R,D.A),Rt=h/(p.k*Ac+D.ka*(D.A-Ac));return{Rt,dT:p.Q*Rt,hot:Ac<D.A*.9999?p.Q/D.A*h/D.ka:0,cov:Ac/D.A}}
+const NG=44,dx=2*D.Rd/NG,mask=new Uint8Array(NG*NG),shape=new Float64Array(NG*NG);let th=new Float64Array(NG*NG),nM=0;
+for(let j=0;j<NG;j++)for(let i=0;i<NG;i++)if(Math.hypot((i+.5-NG/2)*dx,(j+.5-NG/2)*dx)<=D.Rd){mask[j*NG+i]=1;nM++}
+function setShape(f){const C=[[-.35,-.2],[.3,.25],[.1,-.5]];let s=0;for(let j=0;j<NG;j++)for(let i=0;i<NG;i++){const k=j*NG+i;if(!mask[k])continue;const x=(i+.5-NG/2)*dx/D.Rd,y=(j+.5-NG/2)*dx/D.Rd;let v=1;for(const c of C)v+=f*Math.exp(-((x-c[0])**2+(y-c[1])**2)/(2*.2*.2));shape[k]=v;s+=v}for(let k=0;k<NG*NG;k++)if(mask[k])shape[k]*=nM/s}
+function solve2D(p,h,R,it){const kt=D.ksi*D.tsi/(dx*dx),q0=p.Q/(nM*dx*dx);for(let n=0;n<it;n++)for(let j=0;j<NG;j++)for(let i=0;i<NG;i++){const k=j*NG+i;if(!mask[k])continue;
+ const r=Math.hypot((i+.5-NG/2)*dx,(j+.5-NG/2)*dx),g=(r<=R?p.k:D.ka)/h;let s=0,c=0;if(i>0&&mask[k-1]){s+=th[k-1];c++}if(i<NG-1&&mask[k+1]){s+=th[k+1];c++}if(j>0&&mask[k-NG]){s+=th[k-NG];c++}if(j<NG-1&&mask[k+NG]){s+=th[k+NG];c++}
+ th[k]+=1.7*((kt*s+q0*shape[k])/(kt*c+g)-th[k])}let mx=0,sg=0;for(let j=0;j<NG;j++)for(let i=0;i<NG;i++){const k=j*NG+i;if(!mask[k])continue;mx=Math.max(mx,th[k]);const r=Math.hypot((i+.5-NG/2)*dx,(j+.5-NG/2)*dx);sg+=(r<=R?p.k:D.ka)/h*th[k]*dx*dx}return{mx,bal:sg/p.Q}}
+function throttle(p,mx){const room=D.Tlim-D.Tc,f=mx>room?Math.pow(room/mx,.4):1,s=Math.pow(p.Q/700,.4)*f;return{f,clk:1980*s,tf:1979*s,Tm:D.Tc+mx}}
+const BASE={F:400,V:50e-9,mu:100,K:100,n:1,ty:0,k:5,Q:700};
+const SCN=[{id:'thin',lab:'Shear-thinning n=0.5',m:'P',o:{n:.5},r:{h:10.77,R:16.10,cv:100,Rt:.00265,dT:1.85,hot:0}},
+{id:'newt',lab:'Newtonian μ=100 Pa·s',m:'N',o:{},r:{h:24.62,R:16.10,cv:100,Rt:.00605,dT:4.23,hot:0}},
+{id:'b250',lab:'Bingham τy=250 Pa',m:'B',o:{ty:250},r:{h:27.45,R:16.10,cv:100,Rt:.00675,dT:4.72,hot:0}},
+{id:'thick',lab:'Shear-thickening n=1.3',m:'P',o:{n:1.3},r:{h:33.04,R:16.10,cv:100,Rt:.00812,dT:5.68,hot:0}},
+{id:'b5k',lab:'Bingham τy=5 kPa (stall)',m:'B',o:{ty:5000},r:{h:77.32,R:14.35,cv:79.4,Rt:.02387,dT:16.71,hot:2557.2}}];
+function bench(s){const p=Object.assign({},BASE,s.o),T=mk(p,s.m),st=stateAt(p,T,60),h=s.m==='B'&&T.hs>st.h*.97?T.hs:st.h,R=Rof(p,h),q=th1(p,h,R);return{h:h*1e6,R:R*1e3,cv:q.cov*100,Rt:q.Rt,dT:q.dT,hot:q.hot,hraw:st.h*1e6}}
+function ode(p,m,t1){const f=h=>m==='B'?hdB(p,h):hdPL(p,h,plc(p,m).n,plc(p,m).K);let h=D.h0,s=Math.log(1e-6),N=4000,ds=(Math.log(t1)-s)/N;for(let i=0;i<N;i++){const t=Math.exp(s),t2=Math.exp(s+ds/2),t3=Math.exp(s+ds),k1=f(h)*t,k2=f(h+ds/2*k1)*t2,k3=f(h+ds/2*k2)*t2,k4=f(h+ds*k3)*t3;h+=ds/6*(k1+2*k2+2*k3+k4);s+=ds}return h}
+function uprof(p,m,s,h,G){if(m==='B'&&p.ty>0){const z0=p.ty/G;if(z0>=h/2)return 0;const ss=Math.max(s,z0);return(G/2*(h*h/4-ss*ss)-p.ty*(h/2-ss))/p.mu}const{n,K}=plc(p,m),e=(n+1)/n;return n/(n+1)*Math.pow(G/K,1/n)*(Math.pow(h/2,e)-Math.pow(s,e))}
+function flux(p,m,r,h,hd){const G=Gf(p,m,r,h,hd);let q=0;const N=400;for(let i=0;i<N;i++)q+=2*uprof(p,m,(i+.5)/N*h/2,h,G)*h/2/N;return q/(r*(-hd)/2)}
+function runChecks(){const o=[],ck=(n,ok,d)=>o.push({n,ok,d}),rel=(a,b)=>Math.abs(a-b)/Math.abs(b);
+ SCN.forEach(s=>{const b=bench(s),r=s.r,e=Math.max(rel(b.h,r.h),rel(b.R,r.R),rel(b.dT,r.dT));ck('README row · '+s.lab,e<.012,`h ${b.h.toFixed(2)} vs ${r.h} µm, ΔT ${b.dT.toFixed(2)} vs ${r.dT} K (max dev ${(e*100).toFixed(2)} %)`)});
+ const pc=Object.assign({},BASE,{n:.5}),ex=hPL(pc,60,.5,100),nu=ode(pc,'P',60);ck('Power-law closed form vs RK4 ODE (n=0.5)',rel(ex,nu)<1e-3,`${(ex*1e6).toFixed(3)} vs ${(nu*1e6).toFixed(3)} µm`);
+ const pn=Object.assign({},BASE,{n:1}),a1=hPL(pn,60,1,100),a2=hPL(BASE,60,1,BASE.mu);ck('n→1 recovers Stefan (Newtonian)',a1===a2,'identical');
+ const nz=Object.assign({},BASE,{ty:1e-3}),pz=Object.assign({},BASE);ck('τy→0 Bingham → Newtonian',rel(hdB(nz,3e-5),hdPL(pz,3e-5,1,100))<2e-3,'ḣ ratio '+(hdB(nz,3e-5)/hdPL(pz,3e-5,1,100)).toFixed(5));
+ const tc=3*BASE.F*BASE.V/(2*PI**2*D.Rd**5),lo=Object.assign({},BASE,{ty:tc*.97}),hi=Object.assign({},BASE,{ty:tc*1.03});
+ const rl=Rof(lo,hStar(lo)),rh=Rof(hi,hStar(hi));ck('Critical yield stress τy,crit = 2.81 kPa separates full coverage / plastic stall (R* vs R_die)',Math.abs(tc-2810)<15&&rl>=D.Rd*.9999&&rh<D.Rd*.999,`τy,crit = ${tc.toFixed(0)} Pa; R*(0.97τc)=${(rl*1e3).toFixed(2)}, R*(1.03τc)=${(rh*1e3).toFixed(2)} mm`);
+ for(const[n,m]of[[1,'Stefan'],[.5,'n=0.5']]){const p=Object.assign({},BASE,{n}),g=t=>hPL(p,t,n,100),t1=.1,t2=.2,sl=Math.log(g(t2)/g(t1))/Math.log(2);ck('Phase-1 asymptotic exponent h∝t^(−2n/(3n+5)), '+m,Math.abs(sl+2*n/(3*n+5))<.007,`slope ${sl.toFixed(4)} vs ${(-2*n/(3*n+5)).toFixed(4)}`)}
+ const pB=Object.assign({},BASE,{ty:250});for(const m of['N','P','B']){const p=m==='P'?pc:m==='B'?pB:BASE,h=4e-5,hd=m==='B'?hdB(p,h):hdPL(p,h,plc(p,m).n,plc(p,m).K),R=Rof(p,h);
+ const fl=[.3,.7,1].map(x=>flux(p,m,x*R,h,hd)),F=Fof(p,m,h,hd,200);ck('Flux continuity & force balance · '+(m==='N'?'Newtonian':m==='P'?'power-law':'Bingham'),fl.every(v=>Math.abs(v-1)<.005)&&rel(F,p.F)<.005,`∫u dz / (r|ḣ|/2) = ${fl.map(v=>v.toFixed(4)).join(', ')}; ∫p dA = ${F.toFixed(1)} N`)}
+ const hs=SCN.map(s=>bench(s).h);ck('Ordering h: thinning < Newtonian < Bingham < thickening < stall',hs[0]<hs[1]&&hs[1]<hs[2]&&hs[2]<hs[3]&&hs[3]<hs[4],hs.map(v=>v.toFixed(1)).join(' < ')+' µm');
+ const pv=Object.assign({},BASE);let hv=hPL(pv,1,1,100);ck('Constant volume πR²h = V₀ (phase 1)',rel(PI*Rof(pv,hv)**2*hv,pv.V)<1e-12,'exact');
+ setShape(0);th.fill(0);const pf=Object.assign({},BASE),h2=2.5e-5,s2=solve2D(pf,h2,D.Rd,400),e0=pf.Q*h2/(pf.k*nM*dx*dx);ck('2-D solver: uniform covered die → T = Q h/(kA); energy balance',rel(s2.mx,e0)<.003&&Math.abs(s2.bal-1)<.003,`θmax ${s2.mx.toFixed(3)} vs ${e0.toFixed(3)} K; ΣgθdA/Q = ${s2.bal.toFixed(4)}`);return o}
+//END
+const $=id=>document.getElementById(id),COL={N:'#6fa8a0',P:'#a893bd',B:'#cba765'},NAME={N:'Newtonian',P:'Power-law',B:'Bingham'};
+const SL=[['F','Clamp force F₀',50,1000,10,400,v=>v+' N'],['V','Paste volume V₀',10,100,1,50,v=>v+' mm³'],['mu','Consistency μ = K',10,1000,1,100,v=>v+' Pa·sⁿ'],['n','Power-law index n',.3,1.5,.05,.5,v=>(+v).toFixed(2)],['ty','Yield stress τy',0,8000,50,250,v=>v+' Pa'],['k','TIM conductivity k',1,15,.5,5,v=>v+' W/m·K'],['Q','Die power Q',200,1200,50,700,v=>v+' W'],['hot','Power-map hotspot factor',0,2,.1,0,v=>(+v).toFixed(1)+(v==0?' (uniform)':'')]];
+$('sl').innerHTML=SL.map(s=>`<div class="sl"><label>${s[1]} <b id="${s[0]}v"></b></label><input id="${s[0]}" type="range" min="${s[2]}" max="${s[3]}" step="${s[4]}" value="${s[5]}"></div>`).join('');
+$('sc').innerHTML=SCN.map(s=>`<button data-s="${s.id}" style="--ac:${COL[s.m]}">${s.lab}</button>`).join('');
+let p,sel='P',T,TR={},playing=true,sT=0,pendRe=false,hv={};const SMIN=-3,SMAX=Math.log10(60);
+function read(){p={F:+$('F').value,V:+$('V').value*1e-9,mu:+$('mu').value,K:+$('mu').value,n:+$('n').value,ty:+$('ty').value,k:+$('k').value,Q:+$('Q').value};hv.hot=+$('hot').value;SL.forEach(s=>$(s[0]+'v').textContent=s[6]($(s[0]).value))}
+function recompute(){read();TR={N:mk(p,'N'),P:mk(p,'P'),B:mk(p,'B')};setShape(hv.hot);th.fill(0);buildCharts();document.querySelectorAll('#sc button').forEach(b=>b.classList.toggle('on',b.dataset.s===(SCN.find(s=>s.m===sel&&Object.entries(s.o).every(([k,v])=>p[k]==v))||{}).id))}
+SL.forEach(s=>$(s[0]).addEventListener('input',()=>{clearTimeout(pendRe);pendRe=setTimeout(recompute,60);read()}));
+$('sc').onclick=e=>{const b=e.target.closest('button');if(!b)return;const s=SCN.find(x=>x.id===b.dataset.s);sel=s.m;const o=Object.assign({n:1,ty:0},s.o);if(s.m==='P')$('n').value=o.n;if(s.m==='B')$('ty').value=o.ty;$('F').value=400;$('V').value=50;$('mu').value=100;$('k').value=5;$('Q').value=700;recompute();sT=SMIN};
+$('play').onclick=()=>{playing=!playing;$('play').textContent=playing?'Pause':'Play'};$('rst').onclick=()=>{sT=SMIN;playing=true;$('play').textContent='Pause'};
+$('ts').oninput=e=>{playing=false;$('play').textContent='Play';sT=SMIN+(SMAX-SMIN)*e.target.value/1000};
+const STOPS=[[44,58,80],[62,104,128],[102,148,140],[176,178,120],[214,170,100],[200,112,84],[150,62,64]];
+function cm(t,a=1){t=Math.max(0,Math.min(1,t))*(STOPS.length-1);const i=Math.min(Math.floor(t),STOPS.length-2),f=t-i,A=STOPS[i],B=STOPS[i+1];return`rgba(${A[0]+(B[0]-A[0])*f|0},${A[1]+(B[1]-A[1])*f|0},${A[2]+(B[2]-A[2])*f|0},${a})`}
+function cv(c){const d=devicePixelRatio||1,w=c.clientWidth,h=c.clientHeight;if(c.width!=Math.round(w*d)||c.height!=Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d)}const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,w,h}}
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function drawSection(st){const{x,w,h}=cv($('cs')),m=sel,Rd=D.Rd,sx=w*.40/Rd,cx=w/2,die=h-46,gp=12+70*Math.pow(st.h/D.h0,.4),cb=die-gp,R=st.R;
+ x.clearRect(0,0,w,h);x.fillStyle='#4a5a55';x.fillRect(cx-w*.46,die+30,w*.92,12);x.fillStyle='#3a4352';x.fillRect(cx-Rd*sx,die,2*Rd*sx,30);
+ x.fillStyle=css('--mu');x.font='11px system-ui';x.textAlign='center';x.fillText('AI compute die (A = 814 mm², R = 16.10 mm)',cx,die+19);
+ x.fillStyle='#7d6552';x.fillRect(cx-w*.46,cb-34,w*.92,34);x.fillStyle='#e8dccd';x.fillText('Cold plate (T = 45 °C)',cx,cb-14);
+ if(R<Rd*.999){x.fillStyle='rgba(201,112,90,.28)';for(const s of[-1,1])x.fillRect(s>0?cx+R*sx:cx-Rd*sx,cb,(Rd-R)*sx,gp);x.fillStyle='#d98f7b';x.fillText('air gap · hot edge',cx+(R+Rd)/2*sx*(1)+0,cb+gp/2)}
+ const nc=80,nz=12,col=[];let um=0;for(let i=0;i<nc;i++){const r=Math.max(Math.abs((i+.5)/nc*2-1)*R,1e-6),G=st.hd<0?Gf(p,m,r,st.h,st.hd):0;col.push(G);if(G>0)um=Math.max(um,uprof(p,m,0,st.h,G))}
+ for(let i=0;i<nc;i++){const xa=-R+2*R*i/nc;for(let j=0;j<nz;j++){const s=Math.abs((j+.5)/nz-.5)*st.h,u=col[i]>0&&um>0?uprof(p,m,s,st.h,col[i])/um:0;x.fillStyle=cm(.1+.85*Math.pow(u,.7));x.fillRect(cx+xa*sx,cb+gp*j/nz,2*R/nc*sx+.8,gp/nz+.8)}}
+ if(m==='B'&&p.ty>0){x.strokeStyle='rgba(255,255,255,.75)';x.setLineDash([4,3]);x.beginPath();const z=i=>{const r=Math.max(Math.abs(i)*R,1e-6),G=st.hd<0?GB(p,r,st.h,st.hd,p.ty):p.ty*2/st.h;return Math.min(p.ty/G,st.h/2)/st.h};
+  for(let i=-30;i<=30;i++){const X=cx+i/30*R*sx,Y=cb+gp*(.5-z(i/30));i==-30?x.moveTo(X,Y):x.lineTo(X,Y)}for(let i=30;i>=-30;i--)x.lineTo(cx+i/30*R*sx,cb+gp*(.5+z(i/30)));x.closePath();x.stroke();x.setLineDash([])}
+ x.strokeStyle=css('--mu');x.fillStyle=css('--tx');x.textAlign='left';x.beginPath();x.moveTo(cx+w*.46+4,cb);x.lineTo(cx+w*.46+4,die);x.stroke();x.font='600 12px system-ui';x.textAlign='right';x.fillText(`h = ${(st.h*1e6).toFixed(1)} µm`,w-10,die-gp/2+4);
+ x.strokeStyle=css('--mu');x.fillStyle=css('--mu');x.textAlign='center';x.fillText('↓ F₀ = '+p.F+' N',cx,14)}
+function drawMap(st,s2){const{x,w,h}=cv($('tm')),S=Math.min(w-70,h-10),ox=(w-70-S)/2+8,oy=(h-S)/2,c=S/NG,Rd=D.Rd,pxm=S/(2*Rd);x.clearRect(0,0,w,h);
+ x.fillStyle='#2b323f';for(const s of[0,1]){x.fillRect(s?ox+S+4:ox-Math.min(ox-2,50)-4,oy+S*.2,Math.min(ox-2,50),S*.6)}
+ for(let j=0;j<NG;j++)for(let i=0;i<NG;i++){const k=j*NG+i;if(!mask[k])continue;x.fillStyle=cm(th[k]/(D.Tlim-D.Tc+40));x.fillRect(ox+i*c,oy+j*c,c+.6,c+.6)}
+ x.strokeStyle='rgba(255,255,255,.7)';x.setLineDash([5,4]);x.lineWidth=1.3;x.beginPath();x.arc(ox+S/2,oy+S/2,st.R*pxm,0,2*PI);x.stroke();x.setLineDash([]);
+ let mi=0,mv=-1;for(let k=0;k<NG*NG;k++)if(mask[k]&&th[k]>mv){mv=th[k];mi=k}const mx=ox+(mi%NG+.5)*c,my=oy+(Math.floor(mi/NG)+.5)*c;x.strokeStyle='#fff';x.lineWidth=1.5;x.beginPath();x.arc(mx,my,6,0,2*PI);x.stroke();
+ x.fillStyle='#fff';x.font='600 11.5px system-ui';x.textAlign=mx>ox+S/2?'right':'left';x.fillText((D.Tc+mv).toFixed(1)+' °C',mx+(mx>ox+S/2?-10:10),my-9);
+ const bx=w-52;for(let i=0;i<100;i++){x.fillStyle=cm(1-i/99);x.fillRect(bx,oy+i*S/100,12,S/100+1)}x.fillStyle=css('--mu');x.font='10.5px system-ui';x.textAlign='left';x.fillText((D.Tc+D.Tlim-D.Tc+40)+' °C',bx+16,oy+8);x.fillText(D.Tc+' °C',bx+16,oy+S);
+ const yl=oy+S*(1-(D.Tlim-D.Tc)/(D.Tlim-D.Tc+40));x.fillStyle=css('--tx');x.fillRect(bx-3,yl,18,1.5);x.fillText('85 limit',bx+16,yl+4);
+ x.fillStyle=css('--mu');x.textAlign='center';x.fillText('dashed = paste wetted radius',ox+S/2,oy+S+(h-oy-S>12?10:-2))}
+function mkTs(){const a=[];for(let i=0;i<=60;i++)a.push(Math.pow(10,SMIN+(SMAX-SMIN)*i/60));return a}
+let CH={};function buildCharts(){const ts=mkTs();CH={ts,h:{},dT:{}};for(const m of['N','P','B']){CH.h[m]=[];CH.dT[m]=[];for(const t of ts){const s=stateAt(p,TR[m],t);CH.h[m].push(s.h*1e6);CH.dT[m].push(th1(p,s.h,s.R).dT)}}}
+function chart(id,ser,u,t,extra){const{x,w,h}=cv($(id)),L=44,B=22,ts=CH.ts;let lo=1e9,hi=0;for(const m in ser)ser[m].forEach(v=>{lo=Math.min(lo,v);hi=Math.max(hi,v)});if(extra!=null){lo=Math.min(lo,extra);hi=Math.max(hi,extra)}lo=Math.pow(10,Math.floor(Math.log10(lo)-.05));hi=Math.pow(10,Math.ceil(Math.log10(hi)+.05));
+ const X=tt=>L+(Math.log10(tt)-SMIN)/(SMAX-SMIN)*(w-L-8),Y=v=>h-B-(Math.log10(v)-Math.log10(lo))/(Math.log10(hi)-Math.log10(lo))*(h-B-8);x.clearRect(0,0,w,h);x.font='10.5px system-ui';x.fillStyle=css('--mu');x.strokeStyle=css('--ln');x.lineWidth=1;
+ for(let e=Math.log10(lo);e<=Math.log10(hi)+.01;e++){const y=Y(Math.pow(10,e));x.beginPath();x.moveTo(L,y);x.lineTo(w-8,y);x.stroke();x.textAlign='right';x.fillText(Math.pow(10,e)>=1?Math.pow(10,e):Math.pow(10,e).toFixed(Math.max(0,-e)),L-4,y+3)}
+ [1e-3,1e-2,.1,1,10].forEach(v=>{x.textAlign='center';x.fillText(v>=1?v+' s':v*1e3+' ms',X(v),h-6)});
+ if(extra!=null){x.setLineDash([4,3]);x.strokeStyle=css('--mu');x.beginPath();x.moveTo(L,Y(extra));x.lineTo(w-8,Y(extra));x.stroke();x.setLineDash([])}
+ for(const m in ser){x.strokeStyle=COL[m];x.lineWidth=m===sel?2.6:1.4;x.globalAlpha=m===sel?1:.6;x.beginPath();ser[m].forEach((v,i)=>i?x.lineTo(X(ts[i]),Y(v)):x.moveTo(X(ts[i]),Y(v)));x.stroke();x.globalAlpha=1}
+ x.strokeStyle=css('--tx');x.lineWidth=1;x.beginPath();x.moveTo(X(t),6);x.lineTo(X(t),h-B);x.stroke();x.fillStyle=css('--mu');x.textAlign='left';x.fillText(u,L+4,12)}
+let last=performance.now();
+function frame(now){const dt=Math.min((now-last)/1000,.1);last=now;if(playing){sT+=dt*(SMAX-SMIN)/14;if(sT>SMAX){sT=SMAX;playing=false;$('play').textContent='Play'}}
+ const t=Math.pow(10,sT),st=stateAt(p,TR[sel],t),q=th1(p,st.h,st.R),s2=solve2D(p,st.h,st.R,60),tt=throttle(p,s2.mx);$('ts').value=(sT-SMIN)/(SMAX-SMIN)*1000;$('tv').textContent=t<1?(t*1e3).toFixed(0)+' ms':t.toFixed(2)+' s';
+ drawSection(st);drawMap(st,s2);chart('c1',CH.h,'µm (log-log)',t);chart('c2',CH.dT,'K (log-log)',t);
+ let p0=0;{const N=40;for(let i=0;i<N;i++)p0+=Gf(p,sel,(i+.5)*st.R/N,st.h,Math.min(st.hd,-1e-30))*st.R/N}
+ const tiles=[['Bondline h',(st.h*1e6).toFixed(2)+' µm'],['Radius R',(st.R*1e3).toFixed(2)+' mm'],['Die coverage',(q.cov*100).toFixed(1)+' %'],['R_TIM,eff',q.Rt.toFixed(5)+' K/W'],['Mean ΔT_TIM',q.dT.toFixed(2)+' K'],['Peak T_j (2-D)',tt.Tm.toFixed(1)+' °C'],['ΔT_hot (1-D bound)',q.hot?q.hot.toFixed(0)+' K':'0 K'],['Squeeze speed',(-st.hd*1e6).toExponential(2)+' µm/s'],['Peak pressure',(p0/1e3).toFixed(1)+' kPa'],['ε = h/R',(st.h/st.R).toExponential(2)],['Clock',tt.clk.toFixed(0)+' MHz'],['FP16 throughput',tt.tf.toFixed(0)+' TFLOPS']];
+ $('g').innerHTML=tiles.map(a=>`<div class="t"><i>${a[0]}</i><b>${a[1]}</b></div>`).join('');$('mn').textContent=NAME[sel];$('mn').style.color=COL[sel];
+ const pos=v=>Math.max(0,Math.min(100,(v-D.Tc)/80*100));$('bar').innerHTML=`<span style="left:${pos(tt.Tm)}%;background:var(--tx)"></span><em style="left:${pos(tt.Tm)}%">T_j ${tt.Tm.toFixed(0)}°</em><em style="left:${pos(D.Tlim)}%;top:-18px">85 throttle</em><em style="left:${pos(D.Tsd)}%;top:-18px">105</em>`;
+ const bad=tt.Tm>D.Tsd,thr=tt.f<1;$('stat').style.borderColor=bad?'var(--hot)':thr?'var(--warn)':'var(--ok)';$('stat').innerHTML=bad?'<b class="bad">Thermal-shutdown risk.</b> Peak junction exceeds 105 °C: edge hotspot from uncovered die. Clock forced to '+tt.clk.toFixed(0)+' MHz ('+((1-tt.f)*100).toFixed(0)+' % power cut).':thr?'<b style="color:var(--warn)">Throttling.</b> Peak T_j above 85 °C; DVFS cuts clock to '+tt.clk.toFixed(0)+' MHz ('+((1-tt.f)*100).toFixed(0)+' % compute lost).':'<b class="ok">Thermally healthy.</b> Full boost clock; margin to throttle '+(D.Tlim-tt.Tm).toFixed(1)+' K.';
+ requestAnimationFrame(frame)}
+recompute();
+{const rows=SCN.map(s=>({s,b:bench(s)}));$('bt').innerHTML='<tr><th>Model</th><th>h README / sim (µm)</th><th>R (mm)</th><th>Cover %</th><th>R_TIM (K/W)</th><th>ΔT (K)</th><th>ΔT_hot 1-D (K)</th></tr>'+rows.map(({s,b})=>{const r=s.r;return`<tr><td style="color:${COL[s.m]}">${s.lab}</td><td>${r.h} / ${b.h.toFixed(2)}${s.id==='b5k'?' (h*; h(60)='+b.hraw.toFixed(1)+')':''}</td><td>${r.R} / ${b.R.toFixed(2)}</td><td>${r.cv} / ${b.cv.toFixed(1)}</td><td>${r.Rt} / ${b.Rt.toFixed(5)}</td><td>${r.dT} / ${b.dT.toFixed(2)}</td><td>${r.hot} / ${b.hot.toFixed(1)}</td></tr>`}).join('');
+ const ch=runChecks();recompute();const np=ch.filter(c=>c.ok).length;$('vs').textContent=np+'/'+ch.length+' checks passed';$('vs').style.color=np==ch.length?'var(--ok)':'var(--hot)';
+ $('ck').innerHTML=ch.map(c=>`<b class="${c.ok?'ok':'bad'}">${c.ok?'✔':'✘'}</b><span>${c.n}<br><span class="mu">${c.d}</span></span>`).join('')}
+requestAnimationFrame(frame);
+</script></body></html>
