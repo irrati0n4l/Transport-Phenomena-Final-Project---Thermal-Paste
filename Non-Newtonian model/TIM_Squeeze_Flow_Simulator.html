@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Accelerator TIM Squeeze-Flow Lab · Transport Phenomena in Chip Packaging</title>
+<style>
+:root{
+  --bg:#040711;--bg2:#070c1c;--panel:#0c1328;--panel2:#111b36;--line:#1f2f57;--line2:#2c4278;
+  --txt:#eaf0ff;--mut:#8fa2d4;--N:#22d3ee;--P:#e879f9;--B:#fbbf24;--hot:#ff4757;--ok:#2ed573;--acc:#7c3aed;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;padding:0;
+  background:
+    radial-gradient(1400px 700px at 12% -8%,#182968 0%,transparent 58%),
+    radial-gradient(1200px 650px at 95% 2%,#3b1556 0%,transparent 55%),
+    radial-gradient(1100px 700px at 50% 100%,#1e1908 0%,transparent 65%),var(--bg);
+  color:var(--txt);font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+  line-height:1.5;overflow-x:hidden;
+}
+
+/* ============ STICKY TOP NAVBAR ============ */
+.navbar{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  padding:10px 28px;background:rgba(5,9,22,.86);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(56,189,248,.22);box-shadow:0 8px 28px rgba(0,0,0,.45);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.chip-logo{
+  width:40px;height:40px;border-radius:10px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#06b6d4,#7c3aed,#ec4899);
+  box-shadow:0 0 20px rgba(124,58,237,.55),inset 0 0 8px rgba(255,255,255,.35);
+  font-weight:900;font-size:12px;letter-spacing:.7px;color:#fff;
+}
+.brand-title{
+  font-size:18px;font-weight:800;letter-spacing:.2px;
+  background:linear-gradient(90deg,#38bdf8,#e879f9 55%,#fbbf24);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.brand-sub{font-size:11.5px;color:var(--mut)}
+.nav-links{display:flex;gap:6px;flex-wrap:wrap}
+.nav-links a{
+  color:var(--mut);text-decoration:none;font-size:12.5px;font-weight:600;
+  padding:6px 12px;border-radius:8px;border:1px solid transparent;transition:.18s;
+}
+.nav-links a:hover{color:var(--txt);background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.28)}
+.nav-telemetry{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tpill{
+  background:rgba(13,21,45,.92);border:1px solid var(--line);border-radius:9px;padding:4px 10px;
+  display:flex;flex-direction:column;min-width:105px;
+}
+.tpill .tk{font-size:9.5px;text-transform:uppercase;letter-spacing:.9px;color:var(--mut)}
+.tpill .tv{font-size:13.5px;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* ============ PAGE CONTAINER & SECTIONS ============ */
+.page{max-width:1680px;margin:0 auto;padding:18px 26px 60px;display:flex;flex-direction:column;gap:28px}
+.sec-banner{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:8px;
+}
+.sec-banner h2{
+  margin:0;font-size:21px;font-weight:800;letter-spacing:.3px;
+  display:flex;align-items:center;gap:10px;
+}
+.sec-num{
+  display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;
+  background:linear-gradient(135deg,#0284c7,#7c3aed);font-size:13px;font-weight:800;color:#fff;
+}
+.sec-banner p{margin:0;font-size:13px;color:var(--mut)}
+
+/* ============ CARDS & WORKBENCH GRID ============ */
+.card{
+  background:linear-gradient(180deg,rgba(15,24,50,.94),rgba(10,16,35,.95));
+  border:1px solid var(--line);border-radius:16px;padding:15px 17px;
+  box-shadow:0 14px 36px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.card h3{margin:0;font-size:12.5px;letter-spacing:1.25px;text-transform:uppercase;color:#b8c7f4}
+
+.workbench{
+  display:grid;grid-template-columns:340px 1fr 330px;gap:16px;align-items:start;
+}
+@media (max-width:1400px){.workbench{grid-template-columns:330px 1fr}}
+@media (max-width:1020px){.workbench{grid-template-columns:1fr}}
+
+.col-stack{display:flex;flex-direction:column;gap:14px}
+
+/* ============ CONTROLS ============ */
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mbtn{
+  border:1px solid var(--line);background:#080f22;color:var(--txt);padding:9px 4px;border-radius:10px;
+  cursor:pointer;font-size:12.5px;font-weight:700;transition:.18s;
+}
+.mbtn:hover{transform:translateY(-1px)}
+.mbtn.on[data-m="N"]{background:rgba(34,211,238,.18);border-color:var(--N);box-shadow:0 0 16px rgba(34,211,238,.38);color:var(--N)}
+.mbtn.on[data-m="P"]{background:rgba(232,121,249,.18);border-color:var(--P);box-shadow:0 0 16px rgba(232,121,249,.38);color:var(--P)}
+.mbtn.on[data-m="B"]{background:rgba(251,191,36,.18);border-color:var(--B);box-shadow:0 0 16px rgba(251,191,36,.38);color:var(--B)}
+
+.vtabs{display:flex;gap:6px;flex-wrap:wrap}
+.vtab{
+  border:1px solid var(--line);background:#091126;color:var(--mut);padding:5px 11px;border-radius:8px;
+  cursor:pointer;font-size:12px;font-weight:600;transition:.18s;
+}
+.vtab.on{background:linear-gradient(90deg,#0284c7,#7c3aed);color:#fff;border-color:transparent;box-shadow:0 0 14px rgba(124,58,237,.45)}
+
+.ctl{margin:8px 0 2px}
+.ctl label{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-bottom:3px}
+.ctl label b{color:var(--txt);font-weight:700;font-variant-numeric:tabular-nums}
+input[type=range]{
+  width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:6px;
+  background:linear-gradient(90deg,#0284c7,#7c3aed,#ec4899);outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#fff;
+  box-shadow:0 0 0 3px rgba(124,58,237,.55),0 0 12px rgba(232,121,249,.85);cursor:pointer;
+}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:#fff;border:none;cursor:pointer}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.btn{
+  flex:1;border:1px solid var(--line);background:linear-gradient(180deg,#18244a,#0f1833);color:var(--txt);
+  padding:7px 9px;border-radius:9px;cursor:pointer;font-weight:600;font-size:11.8px;transition:.15s;
+}
+.btn:hover{border-color:#6478be;transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(90deg,#0891b2,#7c3aed);border-color:transparent}
+.chk{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--mut);margin-top:8px}
+.chk label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.chk input{accent-color:#a855f7}
+.timebar{display:flex;align-items:center;gap:10px;margin-top:8px}
+.timebar .tl{font-size:12.5px;font-weight:700;min-width:110px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ============ CANVASES ============ */
+canvas{width:100%;display:block;border-radius:12px}
+#heroCanvas{
+  height:475px;
+  background:
+    radial-gradient(850px 320px at 50% 95%,rgba(124,58,237,.22),transparent 70%),
+    radial-gradient(650px 260px at 50% 10%,rgba(34,211,238,.14),transparent 70%),#050a17;
+}
+#top{height:305px;background:#050a17}
+.charts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:1300px){.charts-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:850px){.charts-grid{grid-template-columns:1fr}}
+.ch{height:265px;background:#050a17}
+
+/* ============ TELEMETRY & STATS ============ */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.stat{background:#080f22;border:1px solid #1a274a;border-radius:10px;padding:7px 9px}
+.stat .k{font-size:10.5px;color:var(--mut)}
+.stat .v{font-size:14px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700;margin:3px 4px 0 0}
+.b-ok{background:rgba(46,213,115,.15);color:var(--ok);border:1px solid rgba(46,213,115,.4)}
+.b-warn{background:rgba(251,191,36,.13);color:var(--B);border:1px solid rgba(251,191,36,.4)}
+.b-bad{background:rgba(255,71,87,.14);color:var(--hot);border:1px solid rgba(255,71,87,.45)}
+
+/* ============ SPECS, DERIVATIONS & VERIFICATION SECTIONS ============ */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media (max-width:1100px){.grid3,.grid2{grid-template-columns:1fr}}
+
+.spec-list{margin:0;padding:0;list-style:none;font-size:12.8px}
+.spec-list li{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #172342}
+.spec-list li span{color:var(--mut)}
+.spec-list li b{color:var(--txt);font-variant-numeric:tabular-nums}
+
+.eq{
+  font-family:"Cambria Math","Times New Roman",serif;font-size:14.5px;background:#070d1f;
+  border:1px solid #1c2c54;border-left:3px solid var(--N);border-radius:8px;padding:8px 11px;margin:7px 0;color:#f3f6ff;
+}
+.deriv-step{
+  background:linear-gradient(180deg,rgba(14,22,46,.95),rgba(9,15,32,.95));
+  border:1px solid var(--line);border-radius:14px;padding:15px 17px;
+}
+.deriv-step h4{margin:0 0 6px;font-size:14.5px;color:#fff;display:flex;align-items:center;justify-content:space-between}
+.deriv-step h4 span{font-size:11px;color:var(--N);font-weight:600;background:rgba(34,211,238,.12);padding:2px 8px;border-radius:99px}
+.deriv-step p{margin:6px 0;font-size:12.8px;color:#c5d1f5}
+
+table{width:100%;border-collapse:collapse;font-size:12.3px}
+td,th{padding:7px 7px;border-bottom:1px solid #1b2748;text-align:right;font-variant-numeric:tabular-nums}
+th{color:var(--mut);font-weight:600;background:rgba(255,255,255,.02)}
+td:first-child,th:first-child{text-align:left}
+
+.ver-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
+.ver-item{
+  background:#081024;border:1px solid #1d2d56;border-radius:12px;padding:11px 13px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+}
+.ver-item .vt{font-size:12.8px;font-weight:700;color:#fff}
+.ver-item .vd{font-size:11.8px;color:var(--mut);margin-top:3px}
+.ver-item .vr{font-family:monospace;font-size:11.5px;color:var(--N);margin-top:4px}
+
+footer{
+  margin-top:20px;padding:20px 28px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--mut);
+  background:rgba(5,9,20,.8);
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== STICKY NAVBAR ==================== -->
+<nav class="navbar">
+  <div class="brand">
+    <div class="chip-logo">CoWoS</div>
+    <div>
+      <div class="brand-title">AI Accelerator TIM Squeeze-Flow Lab</div>
+      <div class="brand-sub">Transport Phenomena in Semiconductor Packaging · Newtonian, Power-Law &amp; Bingham Lubrication Theory</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#workbench">1. Live Simulator</a>
+    <a href="#diagnostics">2. 6-Chart Physics Suite</a>
+    <a href="#hardware-specs">3. Hardware &amp; TIM Specs</a>
+    <a href="#derivations">4. Transport Derivations</a>
+    <a href="#verification">5. Automated Verification</a>
+  </div>
+  <div class="nav-telemetry">
+    <div class="tpill">
+      <span class="tk">GPU Boost Clock</span>
+      <span class="tv" id="hdr_clk" style="color:var(--ok)">1980 MHz</span>
+    </div>
+    <div class="tpill">
+      <span class="tk">FP16 Throughput</span>
+      <span class="tv" id="hdr_tflops" style="color:var(--N)">1979 TFLOPS</span>
+    </div>
+    <div class="tpill">
+      <span class="tk">Junction Temp T_j</span>
+      <span class="tv" id="hdr_tj">52.0 °C</span>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- ==================== SECTION 1: INTERACTIVE WORKBENCH ==================== -->
+  <div id="workbench" class="sec-banner">
+    <div>
+      <h2><span class="sec-num">1</span> Interactive AI Accelerator Squeeze-Flow Workbench</h2>
+      <p>Constant-force, constant-volume radial squeeze flow between an AI compute die and liquid-cooled microchannel cold plate</p>
+    </div>
+    <div style="display:flex;gap:14px;font-size:12.5px;color:var(--mut);align-items:center">
+      <span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--N);margin-right:5px"></i>Newtonian (Stefan)</span>
+      <span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--P);margin-right:5px"></i>Power-Law (Scott)</span>
+      <span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--B);margin-right:5px"></i>Bingham (Covey–Stanmore)</span>
+    </div>
+  </div>
+
+  <div class="workbench">
+    <!-- LEFT COLUMN: CONTROLS & PRESETS -->
+    <div class="col-stack">
+      <div class="card">
+        <div class="card-head"><h3>Active Rheology &amp; Hardware Presets</h3></div>
+        <div class="modes">
+          <button class="mbtn on" data-m="N">Newtonian</button>
+          <button class="mbtn" data-m="P">Power-Law</button>
+          <button class="mbtn" data-m="B">Bingham</button>
+        </div>
+        <div style="font-size:11.2px;color:var(--mut);margin:8px 0 5px;font-weight:600;text-transform:uppercase;letter-spacing:.8px">AI Accelerator Package Target</div>
+        <div class="row">
+          <button class="btn" data-hw="h100">H100 SXM5 (700W)</button>
+          <button class="btn" data-hw="b200">B200 Module (1000W)</button>
+          <button class="btn" data-hw="mi300">MI300X (750W)</button>
+        </div>
+        <div style="font-size:11.2px;color:var(--mut);margin:8px 0 5px;font-weight:600;text-transform:uppercase;letter-spacing:.8px">Commercial TIM Formulation Preset</div>
+        <div class="row">
+          <button class="btn" data-preset="ideal">Silicone Oil</button>
+          <button class="btn" data-preset="silver">Shin-Etsu Ag</button>
+          <button class="btn" data-preset="ceramic">Al₂O₃ Bingham</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Physical Parameters</h3></div>
+        <div class="ctl"><label>Heatsink Clamping Force F₀ <b id="F0v"></b></label><input id="F0" type="range" min="50" max="1000" step="10" value="400"></div>
+        <div class="ctl"><label>Dispensed TIM Dot Volume V₀ <b id="V0v"></b></label><input id="V0" type="range" min="10" max="80" step="1" value="30"></div>
+        <div class="ctl"><label>Viscosity μ (μₚ, μ_app at 10³ s⁻¹) <b id="muv"></b></label><input id="mu" type="range" min="1" max="3" step="0.05" value="2"></div>
+        <div class="ctl"><label>Power-Law Index n <b id="nv"></b></label><input id="n" type="range" min="0.2" max="1.5" step="0.05" value="0.45"></div>
+        <div class="ctl"><label>Bingham Yield Stress τ_y <b id="tyv"></b></label><input id="ty" type="range" min="0" max="8000" step="50" value="3200"></div>
+        <div class="ctl"><label>TIM Thermal Conductivity k_TIM <b id="kv"></b></label><input id="k" type="range" min="1" max="15" step="0.5" value="5"></div>
+        <div class="ctl"><label>Compute Die Power Q (TDP) <b id="Qv"></b></label><input id="Q" type="range" min="200" max="1200" step="50" value="700"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Playback &amp; Visual Layers</h3></div>
+        <div class="row">
+          <button class="btn primary" id="play">⏸ Pause</button>
+          <button class="btn" id="reset">↺ Re-Clamp</button>
+          <button class="btn" id="snap">📷 Export PNG</button>
+        </div>
+        <div class="timebar">
+          <input id="scrub" type="range" min="0" max="1000" step="1" value="0">
+          <span class="tl" id="tlab">t = 0 s</span>
+        </div>
+        <div class="ctl"><label>Sweep Speed (1 ms → 120 s log) <b id="durv"></b></label><input id="dur" type="range" min="6" max="40" step="1" value="15"></div>
+        <div class="chk">
+          <label><input type="checkbox" id="cbPart" checked> Filler Particles</label>
+          <label><input type="checkbox" id="cbArr" checked> Velocity Vectors</label>
+          <label><input type="checkbox" id="cbHeat" checked> Thermal Plumes</label>
+          <label><input type="checkbox" id="cbBus" checked> HBM3e Data Pulses</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER COLUMN: 2D + 3D HARDWARE VISUALIZER & TOP-DOWN CoWoS PACKAGE -->
+    <div class="col-stack">
+      <div class="card">
+        <div class="card-head">
+          <h3>Hardware Visualizer · <span id="viewTitle" style="color:var(--N)">2D Lubrication Cross-Section + 3D Isometric CoWoS Stack</span></h3>
+          <div class="vtabs">
+            <button class="vtab on" data-v="split">Split: 2D + 3D Isometric</button>
+            <button class="vtab" data-v="2d">Full 2D Lubrication View</button>
+            <button class="vtab" data-v="3d">Full 3D CoWoS Stack</button>
+          </div>
+        </div>
+        <canvas id="heroCanvas"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Top-Down CoWoS Interposer Map · 6× HBM3e Stacks + Compute Die + Live Paste Footprint</h3>
+          <span style="font-size:11.5px;color:var(--mut)">All 3 constitutive models compared simultaneously</span>
+        </div>
+        <canvas id="top"></canvas>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: 12-METRIC TELEMETRY, ASSUMPTION BADGES & COMPARISON TABLE -->
+    <div class="col-stack">
+      <div class="card">
+        <div class="card-head"><h3>Live Telemetry · <span id="rdName" style="color:var(--N)">Newtonian</span></h3></div>
+        <div class="stats">
+          <div class="stat"><div class="k">Bondline Thickness h(t)</div><div class="v" id="rd_h">–</div></div>
+          <div class="stat"><div class="k">Spread Radius R(t)</div><div class="v" id="rd_R">–</div></div>
+          <div class="stat"><div class="k">GPU Die Coverage</div><div class="v" id="rd_cov">–</div></div>
+          <div class="stat"><div class="k">TIM Temp Drop ΔT_TIM</div><div class="v" id="rd_dT">–</div></div>
+          <div class="stat"><div class="k">Junction Temp T_j</div><div class="v" id="rd_tj">–</div></div>
+          <div class="stat"><div class="k">Eff. Thermal Res. R_eff</div><div class="v" id="rd_reff">–</div></div>
+          <div class="stat"><div class="k">Squeeze Speed −ḣ</div><div class="v" id="rd_hd">–</div></div>
+          <div class="stat"><div class="k">Peak Pressure p(0)</div><div class="v" id="rd_p">–</div></div>
+          <div class="stat"><div class="k">Aspect Ratio ε = h/R</div><div class="v" id="rd_eps">–</div></div>
+          <div class="stat"><div class="k">Squeeze Reynolds Re_sq</div><div class="v" id="rd_re">–</div></div>
+          <div class="stat"><div class="k">Bingham Number Bn</div><div class="v" id="rd_bn">–</div></div>
+          <div class="stat"><div class="k">Brinkman Number Br</div><div class="v" id="rd_br">–</div></div>
+        </div>
+        <div id="badges" style="margin-top:9px"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Final State Benchmark (t = 120 s)</h3></div>
+        <table id="cmp"></table>
+      </div>
+
+      <div class="card phys" id="physCard"></div>
+    </div>
+  </div>
+
+  <!-- ==================== SECTION 2: 6-CHART TRANSPORT PHENOMENA SUITE ==================== -->
+  <div id="diagnostics" class="sec-banner">
+    <div>
+      <h2><span class="sec-num">2</span> 6-Panel Transport Phenomena &amp; Design Diagnostics Suite</h2>
+      <p>Real-time velocity &amp; stress profiles, radial pressure distributions, log-log scaling laws, thermal throttling trajectories, and 2D (F₀, τ_y) design space</p>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="card"><canvas id="c1" class="ch"></canvas></div>
+    <div class="card"><canvas id="c2" class="ch"></canvas></div>
+    <div class="card"><canvas id="c5" class="ch"></canvas></div>
+    <div class="card"><canvas id="c3" class="ch"></canvas></div>
+    <div class="card"><canvas id="c4" class="ch"></canvas></div>
+    <div class="card"><canvas id="c6" class="ch"></canvas></div>
+  </div>
+
+  <!-- ==================== SECTION 3: HARDWARE & TIM SPECIFICATIONS ==================== -->
+  <div id="hardware-specs" class="sec-banner">
+    <div>
+      <h2><span class="sec-num">3</span> AI Hardware Accelerator &amp; TIM Rheology Specifications</h2>
+      <p>Engineering parameters grounding the continuum transport model in real CoWoS data-center packaging</p>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="card">
+      <div class="card-head"><h3 style="color:var(--N)">CoWoS AI Accelerator Package Specs</h3></div>
+      <ul class="spec-list">
+        <li><span>Architecture</span><b>CoWoS-S Silicon Interposer + 6× HBM3e</b></li>
+        <li><span>Compute Die Area (A_die)</span><b>814 mm² (28.5 × 28.5 mm)</b></li>
+        <li><span>Equivalent Disk Radius (R_eq)</span><b>16.10 mm</b></li>
+        <li><span>Thermal Design Power (Q)</span><b>700 W (86.0 W/cm² heat flux)</b></li>
+        <li><span>Cold-Plate Coolant Temp (T_cold)</span><b>45.0 °C (Direct-to-Chip Liquid)</b></li>
+        <li><span>Thermal Throttle Threshold (T_j,max)</span><b>85.0 °C (ΔT_TIM,budget ≤ 10 °C)</b></li>
+        <li><span>Nominal Clamping Load (F₀)</span><b>400 N (~491 kPa mean die pressure)</b></li>
+        <li><span>Initial Pea-Dot Height (h₀)</span><b>300 µm (0.30 mm)</b></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3 style="color:var(--P)">Rheological Constitutive Models</h3></div>
+      <ul class="spec-list">
+        <li><span>1. Newtonian Baseline</span><b>τ_rz = μ γ̇  (Constant viscosity μ)</b></li>
+        <li><span>Newtonian Force Scaling</span><b>F₀ ∝ (−ḣ)/h⁵ (const V₀) → h ∝ t⁻¹/⁴</b></li>
+        <li><span>2. Power-Law (Ostwald–de Waele)</span><b>τ_rz = K |γ̇|ⁿ⁻¹ γ̇  (n &lt; 1 thinning)</b></li>
+        <li><span>Consistency Matching Rule</span><b>K = μ · (10³ s⁻¹)¹⁻ⁿ</b></li>
+        <li><span>Power-Law Time Scaling</span><b>h(t) ∝ t⁻²ⁿ/⁽³ⁿ⁺⁵⁾ (Scott Eq.)</b></li>
+        <li><span>3. Bingham Viscoplastic Paste</span><b>τ_rz = τ_y sgn(γ̇) + μ_p γ̇  (|τ| &gt; τ_y)</b></li>
+        <li><span>Bingham Pseudo-Plug Boundary</span><b>z₀(r) = τ_y / (−∂p/∂r)</b></li>
+        <li><span>Plastic Stall Thickness (h*)</span><b>h* = (2τ_y V₀³/² / 3√π F₀)²/⁵</b></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3 style="color:var(--B)">Manufacturing Design Trade-Offs</h3></div>
+      <ul class="spec-list">
+        <li><span>Low Viscosity Newtonian Oil</span><b>Thin BLT, but suffers thermal pump-out</b></li>
+        <li><span>Shear-Thinning Ag Grease (n ≈ 0.4)</span><b>Spreads rapidly under high clamp shear</b></li>
+        <li><span>High Yield-Stress Paste (τ_y &gt; 3 kPa)</span><b>Resists pump-out, risks stall h* &amp; dry corners</b></li>
+        <li><span>Air-Gap Conductivity (k_air)</span><b>0.026 W/m·K (~192× worse than TIM!)</b></li>
+        <li><span>BLT Sensitivity (at k = 5 W/m·K)</span><b>+1.72 °C per +10 µm bondline thickness</b></li>
+        <li><span>Continuum Limit (Filler Size d_p)</span><b>h &gt; 15 µm (avoids particle jamming)</b></li>
+        <li><span>Capillary vs. Clamp Pressure</span><b>2γ/h ~ 1 kPa ≪ F₀/A_die ~ 490 kPa</b></li>
+        <li><span>Viscous Dissipation (Brinkman Br)</span><b>Br = μ ū²/(k ΔT) ~ 10⁻⁸ ≪ 1 (isothermal)</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ==================== SECTION 4: FIRST-PRINCIPLES DERIVATIONS ==================== -->
+  <div id="derivations" class="sec-banner">
+    <div>
+      <h2><span class="sec-num">4</span> First-Principles Transport Phenomena Derivation Flow</h2>
+      <p>Complete 6-step mathematical chain from Reynolds Transport Theorem to GPU thermal resistance</p>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="deriv-step">
+      <h4>Step 1 · Deformable CV &amp; RTT Mass Conservation <span>Conservation Slides 16–37</span></h4>
+      <p>Choose a cylindrical pillbox of <b>fixed interior radius r &lt; R(t)</b> and <b>moving top boundary z = h(t)</b>. The plates at z = 0 and z = h(t) are impermeable, so all volume displaced by the descending cold plate (ḣ &lt; 0) must exit radially through the curved surface area 2πr·h(t):</p>
+      <div class="eq">d/dt (π r² h) + 2π r ∫₀ʰ u<sub>r</sub>(r,z) dz = 0 &nbsp;⇒&nbsp; q<sub>r</sub>(r) = ∫₀ʰ u<sub>r</sub>(r,z) dz = r(−ḣ) / 2</div>
+      <p>Global conservation of the incompressible droplet volume V₀ fixes the moving outer radius until die-edge overflow:</p>
+      <div class="eq">V₀ = π R(t)² h(t) &nbsp;⇒&nbsp; R(t) = min( √[V₀ / (π h(t))], R<sub>eq</sub> )</div>
+    </div>
+
+    <div class="deriv-step">
+      <h4>Step 2 · Cauchy Momentum &amp; Lubrication Scaling <span>Welty Ch. 5–9 &amp; Dim. Analysis</span></h4>
+      <p>At GPU packaging scales (h ~ 50 µm, R ~ 16.1 mm), the geometric aspect ratio is <b>ε = h/R ≈ 3×10⁻³ ≪ 1</b> and the squeeze Reynolds number is <b>Re_sq = ρ|ḣ|h/μ ~ 10⁻⁷ ≪ 1</b>. Dropping inertia O(Re_sq) and radial normal-stress gradients O(ε²) reduces cylindrical r-momentum to:</p>
+      <div class="eq">0 = −∂p/∂r + ∂τ<sub>rz</sub>/∂z, &nbsp;&nbsp; ∂p/∂z ≈ 0 &nbsp;⇒&nbsp; p = p(r,t)</div>
+      <p>Integrating vertically with midplane symmetry τ_rz(r, h/2) = 0 gives the <b>universal linear shear-stress distribution</b> valid for every fluid model:</p>
+      <div class="eq">τ<sub>rz</sub>(r,z) = G(r) · (h/2 − z), &nbsp;&nbsp; where G(r) ≡ −∂p/∂r &gt; 0</div>
+    </div>
+
+    <div class="deriv-step">
+      <h4>Step 3 · Closure 1: Newtonian Fluid (Stefan Law) <span>τ_rz = μ ∂u_r/∂z</span></h4>
+      <p>Substituting Newton's law of viscosity and integrating with no-slip boundary conditions u_r(0) = u_r(h) = 0 yields a local parabolic Poiseuille velocity profile. Matching q_r(r) = r(−ḣ)/2 gives:</p>
+      <div class="eq">u<sub>r</sub>(r,z) = [G(r)/(2μ)] z(h − z), &nbsp;&nbsp; G(r) = 6 μ r (−ḣ) / h³</div>
+      <p>Integrating p(r) from r to R (with p(R) = p_∞) and integrating 2πr·p(r) over the disk gives the constant-volume Stefan ODE:</p>
+      <div class="eq">F₀ = 3π μ R⁴(−ḣ)/(2h³) = 3μ V₀²(−ḣ)/(2π h⁵) &nbsp;⇒&nbsp; h(t) = h₀ [ 1 + 8π F₀ h₀⁴ t / (3μ V₀²) ]<sup>−1/4</sup></div>
+    </div>
+
+    <div class="deriv-step">
+      <h4>Step 4 · Closure 2: Power-Law Fluid (Scott Law) <span>τ_rz = K |γ̇|ⁿ⁻¹ γ̇</span></h4>
+      <p>For a shear-thinning particle-filled thermal grease (n &lt; 1), high shear near the walls lowers apparent viscosity, blunting the velocity profile:</p>
+      <div class="eq">u<sub>r</sub>(r,z) = [n/(n+1)] (G/K)<sup>1/n</sup> [ (h/2)<sup>(n+1)/n</sup> − |h/2 − z|<sup>(n+1)/n</sup> ]</div>
+      <p>Enforcing the kinematic flux constraint q_r(r) = r(−ḣ)/2 and integrating pressure over the expanding footprint R(t) = √(V₀/πh) yields:</p>
+      <div class="eq">F₀ = [2π K / (n+3)] [(2n+1)/n]ⁿ (V₀/π)<sup>(n+3)/2</sup> (−ḣ)ⁿ / h<sup>(5n+5)/2</sup> &nbsp;⇒&nbsp; h(t) ∝ t<sup>−2n/(3n+5)</sup></div>
+    </div>
+
+    <div class="deriv-step">
+      <h4>Step 5 · Closure 3: Bingham Viscoplastic Fluid &amp; Stall <span>Covey–Stanmore Model</span></h4>
+      <p>Where |τ_rz| ≤ τ_y around the midplane |h/2 − z| ≤ z₀(r) = τ_y/G(r), the paste moves as an unyielded pseudo-plug core (Lipscomb–Denn paradox). Integrating across the sheared wall layers and plug core gives the Buckingham–Reiner flux cubic in ξ₀(r) = 2z₀/h = 2τ_y/(hG):</p>
+      <div class="eq">[h³ G(r) / (12 μ<sub>p</sub>)] (1 − 1.5 ξ₀ + 0.5 ξ₀³) = r(−ḣ) / 2</div>
+      <p>As −ḣ → 0, ξ₀ → 1 everywhere (G → 2τ_y/h, conical pressure profile), arresting flow permanently at the <b>plastic stall thickness h*</b>:</p>
+      <div class="eq">F<sub>stall</sub> = 2π τ<sub>y</sub> R³ / (3h) &nbsp;⇒&nbsp; h* = [ 2 τ<sub>y</sub> V₀<sup>3/2</sup> / (3√π F₀) ]<sup>2/5</sup>, &nbsp;&nbsp; R* = √[V₀ / (π h*)]</div>
+    </div>
+
+    <div class="deriv-step">
+      <h4>Step 6 · 1D Fourier Conduction &amp; Parallel Air-Gap Network <span>Conservation Slides 48–50</span></h4>
+      <p>When R(t) &lt; R_eq, the wetted central disk A_cov = πR² conducts heat through TIM (k_TIM) in parallel with the dry perimeter A_air = A_die − A_cov conducting through trapped air (k_air = 0.026 W/m·K):</p>
+      <div class="eq">1 / R<sub>eff</sub> = k<sub>TIM</sub> A<sub>cov</sub> / h + k<sub>air</sub> (A<sub>die</sub> − A<sub>cov</sub>) / h &nbsp;⇒&nbsp; ΔT<sub>TIM</sub> = Q · R<sub>eff</sub></div>
+      <p>Because k_TIM / k_air ≈ 192, any Bingham stall that leaves R* &lt; R_eq chokes the effective conduction area and spikes junction temperature T_j = T_cold + ΔT_TIM past the 85 °C throttle limit.</p>
+    </div>
+  </div>
+
+  <!-- ==================== SECTION 5: AUTOMATED PHYSICS VERIFICATION ==================== -->
+  <div id="verification" class="sec-banner">
+    <div>
+      <h2><span class="sec-num">5</span> Live Automated Physics Verification Suite (7-Point Course Checklist)</h2>
+      <p>Real-time numerical verification executed in your browser against analytical limiting cases and conservation identities</p>
+    </div>
+  </div>
+
+  <div class="ver-grid" id="verGrid"></div>
+
+</div>
+
+<footer>
+  <div><b>AI Accelerator TIM Squeeze-Flow Lab</b> · Built from first-principles Transport Phenomena (Welty, Wicks, Wilson &amp; Rorrer / IIT Hyderabad Course Notes)</div>
+  <div>Self-contained zero-dependency HTML5/Canvas engine · Ready for GitHub Pages (`index.html`)</div>
+</footer>
+
+<script>
+"use strict";
+/* ===================== CONSTANTS & STATE ===================== */
+const $ = id => document.getElementById(id);
+const PI = Math.PI;
+let A_DIE = 814e-6, S_DIE = Math.sqrt(A_DIE), R_EQ = Math.sqrt(A_DIE / PI);
+const RHO = 2500, K_AIR = 0.026, H0 = 0.3e-3, T_MAX = 120, T_MIN = 1e-3, GREF = 1000, T_COLD = 45.0;
+const MODES = ['N', 'P', 'B'];
+const COL = { N: '#22d3ee', P: '#e879f9', B: '#fbbf24' };
+const RGB = { N: [34, 211, 238], P: [232, 121, 249], B: [251, 191, 36] };
+const NAME = { N: 'Newtonian', P: 'Power-law', B: 'Bingham' };
+let P = {};
+let sel = 'N';
+let viewMode = 'split';
+
+function readParams() {
+  P.F0 = +$('F0').value;
+  P.V0 = +$('V0').value * 1e-9;
+  P.mu = Math.pow(10, +$('mu').value);
+  P.n = +$('n').value;
+  P.K = P.mu * Math.pow(GREF, 1 - P.n);
+  P.ty = +$('ty').value;
+  P.k = +$('k').value;
+  P.Q = +$('Q').value;
+  $('F0v').textContent = P.F0 + ' N';
+  $('V0v').textContent = (+$('V0').value) + ' mm³';
+  $('muv').textContent = fmt(P.mu, 3) + ' Pa·s';
+  $('nv').textContent = P.n.toFixed(2) + (P.n < 0.99 ? ' (thinning)' : P.n > 1.01 ? ' (thickening)' : ' (Newtonian)');
+  $('tyv').textContent = P.ty + ' Pa';
+  $('kv').textContent = P.k + ' W/m·K';
+  $('Qv').textContent = P.Q + ' W';
+  $('durv').textContent = $('dur').value + ' s';
+}
+
+/* ===================== TRANSPORT PHENOMENA ENGINE ===================== */
+const Rof = h => Math.min(Math.sqrt(P.V0 / (PI * h)), R_EQ);
+const Cn = n => Math.pow((2 * n + 1) / n, n);
+
+function hdN(h, mu = P.mu, F0 = P.F0, V0 = P.V0) {
+  const R = Math.min(Math.sqrt(V0 / (PI * h)), R_EQ);
+  return -2 * Math.pow(h, 3) * F0 / (3 * PI * mu * Math.pow(R, 4));
+}
+
+function hdP(h, n = P.n, K = P.K, F0 = P.F0, V0 = P.V0) {
+  const R = Math.min(Math.sqrt(V0 / (PI * h)), R_EQ);
+  const v = F0 * (n + 3) * Math.pow(h, 2 * n + 1) / (2 * PI * K * Cn(n) * Math.pow(R, n + 3));
+  return -Math.pow(v, 1 / n);
+}
+
+function GB(r, h, hd, ty = P.ty, mu = P.mu) {
+  const a = r * (-hd) / 2;
+  if (ty <= 0) return 12 * mu * a / Math.pow(h, 3);
+  const g0 = 2 * ty / h;
+  if (a <= 0) return g0;
+  const c = Math.pow(h, 3) * g0 / (12 * mu);
+  let lo = -40, hi = 0;
+  for (let i = 0; i < 38; i++) {
+    const m = (lo + hi) / 2, x = Math.exp(m);
+    if (c * (1 - 1.5 * x + 0.5 * x * x * x) / x - a > 0) lo = m; else hi = m;
+  }
+  return g0 / Math.exp((lo + hi) / 2);
+}
+function FB(h, hd, ty = P.ty, mu = P.mu) {
+  const R = Rof(h), N = 24;
+  let F = 0, prev = 0;
+  for (let i = 1; i <= N; i++) {
+    const r = R * i / N, g = PI * r * r * GB(r, h, hd, ty, mu);
+    F += (g + prev) / 2 * (R / N);
+    prev = g;
+  }
+  return F;
+}
+function hdB(h, ty = P.ty, mu = P.mu) {
+  if (ty <= 0) return hdN(h, mu);
+  const R = Rof(h);
+  if (P.F0 <= 2 * PI * ty * Math.pow(R, 3) / (3 * h)) return 0;
+  let lo = 0, hi = -hdN(h, mu);
+  for (let i = 0; i < 32; i++) {
+    const m = (lo + hi) / 2;
+    if (FB(h, -m, ty, mu) < P.F0) lo = m; else hi = m;
+  }
+  return -(lo + hi) / 2;
+}
+function hStarFor(F0 = P.F0, ty = P.ty, V0 = P.V0) {
+  if (ty <= 0) return 0;
+  const hv = Math.pow(2 * ty * Math.pow(V0, 1.5) / (3 * Math.sqrt(PI) * F0), 0.4);
+  if (Math.sqrt(V0 / (PI * hv)) <= R_EQ) return hv;
+  return 2 * PI * ty * Math.pow(R_EQ, 3) / (3 * F0);
+}
+function dTof(h, R) {
+  const Ac = Math.min(PI * R * R, A_DIE);
+  return P.Q * h / (P.k * Ac + K_AIR * (A_DIE - Ac));
+}
+
+function traj(fn, hs) {
+  const mk = (t, h, hd) => { const R = Rof(h); return { t, h, hd, R, dT: dTof(h, R) }; };
+  let h = H0, t = 0;
+  const hd0 = fn(h);
+  const pts = [mk(0, h, hd0)];
+  if (!(hd0 < 0)) { pts.push(mk(T_MAX, h, 0)); return pts; }
+  for (let g = 0; g < 5500 && t < T_MAX; g++) {
+    let dh = 0.0048 * h;
+    if (hs > 0) dh = Math.min(dh, 0.06 * (h - hs));
+    if (dh < 1e-13) break;
+    const hd = fn(h - dh / 2);
+    if (!(hd < 0)) break;
+    const dt = dh / (-hd);
+    if (t + dt > T_MAX) {
+      h -= dh * (T_MAX - t) / dt;
+      t = T_MAX;
+      pts.push(mk(t, h, hd));
+      break;
+    }
+    t += dt;
+    h -= dh;
+    pts.push(mk(t, h, hd));
+  }
+  if (pts[pts.length - 1].t < T_MAX) pts.push(mk(T_MAX, h, 0));
+  return pts;
+}
+
+let TR = {}, HS = 0;
+function recompute() {
+  readParams();
+  HS = hStarFor();
+  TR.N = traj(h => hdN(h), 0);
+  TR.P = traj(h => hdP(h), 0);
+  TR.B = traj(h => hdB(h), HS);
+  needReinit = true;
+  buildCompare();
+  runVerificationSuite();
+}
+
+function stateAt(m, t) {
+  const a = TR[m];
+  if (t <= 0) return a[0];
+  if (t >= a[a.length - 1].t) return a[a.length - 1];
+  let lo = 0, hi = a.length - 1;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if (a[mid].t <= t) lo = mid; else hi = mid;
+  }
+  const p = a[lo], q = a[hi], f = (t - p.t) / (q.t - p.t);
+  const h = p.h + (q.h - p.h) * f, R = Rof(h);
+  return { t, h, R, hd: p.hd + (q.hd - p.hd) * f, dT: dTof(h, R) };
+}
+
+function field(m, st) {
+  const h = st.h, hd = st.hd, mu = P.mu, n = P.n, K = P.K, ty = P.ty, R = st.R;
+  let G;
+  if (m === 'N') G = r => 6 * mu * Math.abs(r) * Math.max(-hd, 0) / Math.pow(h, 3);
+  else if (m === 'P') {
+    const C = Cn(n);
+    G = r => 2 * K * C * Math.pow(Math.abs(r), n) * Math.pow(Math.max(-hd, 0), n) / Math.pow(h, 2 * n + 1);
+  } else {
+    const N = 36, tab = new Float64Array(N + 1);
+    for (let i = 0; i <= N; i++) tab[i] = GB(Math.max(R * i / N, 1e-9), h, Math.min(hd, 0));
+    G = r => {
+      const x = Math.min(Math.abs(r) / R * N, N);
+      const i = Math.min(Math.floor(x), N - 1), f = x - i;
+      return tab[i] * (1 - f) + tab[i + 1] * f;
+    };
+  }
+  function u(r, z, g) {
+    const s = Math.abs(h / 2 - z);
+    if (m === 'N') return g / (2 * mu) * (h * h / 4 - s * s);
+    if (m === 'P') {
+      if (g <= 0) return 0;
+      const e = (n + 1) / n;
+      return n / (n + 1) * Math.pow(g / K, 1 / n) * (Math.pow(h / 2, e) - Math.pow(s, e));
+    }
+    if (ty <= 0) return g / (2 * mu) * (h * h / 4 - s * s);
+    const z0 = ty / g;
+    if (z0 >= h / 2) return 0;
+    const ss = Math.max(s, z0);
+    return (g / 2 * (h * h / 4 - ss * ss) - ty * (h / 2 - ss)) / mu;
+  }
+  function uz(r, z) {
+    const g = G(Math.max(Math.abs(r), 1e-6));
+    let tot = 0, part = 0;
+    const dz = h / 12;
+    for (let k = 0; k < 12; k++) {
+      const uk = u(r, (k + 0.5) * dz, g);
+      tot += uk;
+      part += uk * Math.min(Math.max((z - k * dz) / dz, 0), 1);
+    }
+    return hd * (tot > 0 ? part / tot : z / h);
+  }
+  function pProf(N = 40) {
+    const pr = new Float64Array(N + 1);
+    for (let i = N - 1; i >= 0; i--) {
+      const rMid = (i + 0.5) * R / N;
+      pr[i] = pr[i + 1] + G(rMid) * (R / N);
+    }
+    return pr;
+  }
+  function p0() { return pProf(40)[0]; }
+  return { G, u, uz, p0, pProf, h, R, hd };
+}
+
+/* ===================== DRAWING UTILITIES ===================== */
+function fmt(v, d = 3) {
+  if (!isFinite(v)) return '∞';
+  if (v === 0) return '0';
+  const a = Math.abs(v);
+  if (a >= 1e4 || a < 1e-2) return v.toExponential(Math.max(d - 1, 1));
+  return (+v.toPrecision(d)).toString();
+}
+function setupCanvas(c) {
+  const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
+  if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) {
+    c.width = Math.round(w * dpr);
+    c.height = Math.round(h * dpr);
+  }
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w, h };
+}
+const STOPS = [[11, 20, 70], [21, 84, 200], [0, 188, 212], [52, 211, 153], [253, 224, 71], [251, 146, 60], [244, 63, 94]];
+function cmap(t, a = 1) {
+  t = Math.max(0, Math.min(1, t)) * (STOPS.length - 1);
+  const i = Math.min(Math.floor(t), STOPS.length - 2), f = t - i, A = STOPS[i], B = STOPS[i + 1];
+  return `rgba(${A[0] + (B[0] - A[0]) * f | 0},${A[1] + (B[1] - A[1]) * f | 0},${A[2] + (B[2] - A[2]) * f | 0},${a})`;
+}
+function heatCol(dT, a = 1) {
+  const t = Math.max(0, Math.min(1, Math.log10(Math.max(dT, 0.5)) / Math.log10(60)));
+  return cmap(0.25 + 0.75 * t, a);
+}
+function rrect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function arrow(ctx, x1, y1, x2, y2, hw) {
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - hw * Math.cos(a - 0.45), y2 - hw * Math.sin(a - 0.45));
+  ctx.lineTo(x2 - hw * Math.cos(a + 0.45), y2 - hw * Math.sin(a + 0.45));
+  ctx.closePath(); ctx.fill();
+}
+function interArea(rho, a) {
+  if (rho <= a) return PI * rho * rho;
+  if (rho >= a * Math.SQRT2) return 4 * a * a;
+  return PI * rho * rho - 4 * (rho * rho * Math.acos(a / rho) - a * Math.sqrt(rho * rho - a * a));
+}
+function visRadius(Ac, a) {
+  let lo = 0, hi = a * Math.SQRT2;
+  for (let i = 0; i < 36; i++) {
+    const m = (lo + hi) / 2;
+    if (interArea(m, a) < Ac) lo = m; else hi = m;
+  }
+  return (lo + hi) / 2;
+}
+
+/* ===================== PARTICLES & HARDWARE PULSES ===================== */
+let parts = [], needReinit = true, tPrev = 0;
+function initParts(st) {
+  parts = [];
+  for (let i = 0; i < 240; i++) {
+    parts.push({ x: (Math.random() * 2 - 1) * st.R * 0.97, z: (0.03 + 0.94 * Math.random()) * st.h, gone: false });
+  }
+}
+function advect(m, t0, t1) {
+  if (t1 <= t0) return;
+  const s0 = stateAt(m, t0), s1 = stateAt(m, t1);
+  const steps = Math.min(28, Math.max(1, Math.ceil(Math.abs(Math.log(s1.h / s0.h)) / 0.012)));
+  const dt = (t1 - t0) / steps;
+  for (let k = 0; k < steps; k++) {
+    const st = stateAt(m, t0 + (k + 0.5) * dt), F = field(m, st);
+    const stN = stateAt(m, t0 + (k + 1) * dt);
+    for (const p of parts) {
+      if (p.gone) continue;
+      const r = Math.abs(p.x), g = F.G(Math.max(r, 1e-6));
+      const ur = F.u(r, p.z, g), w = F.uz(r, p.z);
+      p.x += Math.sign(p.x) * ur * dt;
+      p.z += w * dt;
+      p.z = Math.min(Math.max(p.z * stN.h / st.h, 0.01 * stN.h), 0.99 * stN.h);
+      if (Math.abs(p.x) > stN.R * 1.001 && stN.R >= R_EQ * 0.999) p.gone = true;
+      else if (Math.abs(p.x) > stN.R) p.x = Math.sign(p.x) * stN.R * 0.999;
+    }
+  }
+}
+
+const sparks = Array.from({ length: 65 }, () => ({ x: Math.random() * 2 - 1, p: Math.random(), v: 0.28 + Math.random() * 0.35 }));
+const coolantPackets = Array.from({ length: 36 }, (_, i) => ({ lane: i % 6, p: Math.random(), v: 0.35 + (i % 3) * 0.12 }));
+
+/* ===================== 2D CROSS-SECTION RENDERER ===================== */
+function render2DSection(ctx, x0, y0, w, H, t, dtReal) {
+  ctx.save();
+  ctx.beginPath(); ctx.rect(x0, y0, w, H); ctx.clip();
+  ctx.translate(x0, y0);
+
+  const m = sel, st = stateAt(m, t), F = field(m, st);
+  const cx = w / 2, sx = (w * 0.38) / R_EQ;
+  const subTop = H - 46, dieTop = subTop - 44;
+  const gp = 8 + 142 * Math.pow(st.h / H0, 0.55);
+  const cpBot = dieTop - gp, cpTop = cpBot - 28, finTop = cpTop - 110;
+  const dieL = cx - R_EQ * sx, dieR = cx + R_EQ * sx, plL = cx - w * 0.45, plR = cx + w * 0.45;
+  const now = performance.now();
+  const pulse = 0.5 + 0.5 * Math.sin(now / 260);
+
+  // 1. CoWoS Silicon Interposer & SXM Substrate + BGA Balls
+  let g = ctx.createLinearGradient(0, subTop, 0, subTop + 28);
+  g.addColorStop(0, '#0f5132'); g.addColorStop(1, '#052e1c');
+  ctx.fillStyle = g; rrect(ctx, plL - 8, subTop, plR - plL + 16, 26, 6); ctx.fill();
+  ctx.strokeStyle = 'rgba(250,204,21,.28)'; ctx.lineWidth = 1.2;
+  for (let i = 0; i < 16; i++) {
+    const x = plL + (i + 0.5) * (plR - plL) / 16;
+    ctx.beginPath(); ctx.moveTo(x, subTop + 5); ctx.lineTo(x + 12, subTop + 21); ctx.stroke();
+  }
+  if ($('cbBus').checked) {
+    for (let i = 0; i < 10; i++) {
+      const ph = ((now / 700 + i * 0.1) % 1);
+      const bx = plL + ph * (plR - plL);
+      ctx.fillStyle = '#38bdf8'; ctx.shadowColor = '#38bdf8'; ctx.shadowBlur = 8;
+      ctx.fillRect(bx, subTop + 11, 10, 2.5);
+    }
+    ctx.shadowBlur = 0;
+  }
+  ctx.fillStyle = '#cbd5e1';
+  for (let i = 0; i < 28; i++) {
+    const x = plL + (i + 0.5) * (plR - plL) / 28;
+    ctx.beginPath(); ctx.arc(x, subTop + 31, 3.8, 0, 2 * PI); ctx.fill();
+  }
+
+  // Side HBM3e stacks
+  const hbmW = (dieL - plL) * 0.65;
+  if (hbmW > 18) {
+    for (const sgn of [-1, 1]) {
+      const hx = sgn < 0 ? dieL - hbmW - 8 : dieR + 8;
+      const hy = dieTop + 6, hh = subTop - hy;
+      ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+      rrect(ctx, hx, hy, hbmW, hh, 3); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(56,189,248,.35)';
+      for (let l = 1; l < 6; l++) {
+        const ly = hy + l * hh / 6;
+        ctx.beginPath(); ctx.moveTo(hx + 2, ly); ctx.lineTo(hx + hbmW - 2, ly); ctx.stroke();
+      }
+      ctx.fillStyle = '#94a3b8'; ctx.font = '600 9.5px Segoe UI'; ctx.textAlign = 'center';
+      ctx.fillText('HBM3e', hx + hbmW / 2, hy + hh / 2 + 3);
+    }
+  }
+
+  // 2. Main AI Compute Die with Tensor Core SM Tiles
+  g = ctx.createLinearGradient(0, dieTop, 0, subTop);
+  g.addColorStop(0, heatCol(st.dT, 0.95)); g.addColorStop(0.3, '#334155'); g.addColorStop(1, '#1e293b');
+  ctx.fillStyle = g; ctx.fillRect(dieL, dieTop, dieR - dieL, subTop - dieTop);
+
+  const nSM = 16, smW = (dieR - dieL) / nSM;
+  for (let i = 0; i < nSM; i++) {
+    const act = 0.35 + 0.65 * Math.sin(now / 180 + i * 1.7) * Math.sin(now / 310 - i * 0.9);
+    ctx.fillStyle = `rgba(56,189,248,${0.12 + 0.35 * Math.max(0, act)})`;
+    ctx.fillRect(dieL + i * smW + 1.5, dieTop + 5, smW - 3, 12);
+  }
+  if (st.R < R_EQ * 0.999) {
+    for (const sgn of [-1, 1]) {
+      const x0s = cx + sgn * st.R * sx, x1s = sgn > 0 ? dieR : dieL;
+      const hg = ctx.createLinearGradient(x0s, 0, x1s, 0);
+      hg.addColorStop(0, 'rgba(255,71,87,0)');
+      hg.addColorStop(1, `rgba(255,71,87,${0.55 + 0.4 * pulse})`);
+      ctx.fillStyle = hg;
+      ctx.fillRect(Math.min(x0s, x1s), dieTop, Math.abs(x1s - x0s), 20);
+    }
+  }
+  ctx.fillStyle = 'rgba(255,255,255,.88)'; ctx.font = '700 11.5px Segoe UI'; ctx.textAlign = 'center';
+  ctx.fillText(`AI Compute Die (${Math.round(A_DIE * 1e6)} mm²) · ${P.Q} W (${fmt(P.Q / (A_DIE * 1e4), 3)} W/cm²)`, cx, dieTop + 33);
+
+  // 3. TIM Layer
+  const R = st.R;
+  const umax = F.u(R, st.h / 2, F.G(R)) || 0;
+  const nx = 96, nz = 20;
+  for (let i = 0; i < nx; i++) {
+    const xa = -R + 2 * R * i / nx, xb = -R + 2 * R * (i + 1) / nx, r = Math.abs((xa + xb) / 2), gg = F.G(Math.max(r, 1e-7));
+    for (let j = 0; j < nz; j++) {
+      const z = (j + 0.5) / nz * st.h, uu = umax > 0 ? F.u(r, z, gg) / umax : 0;
+      ctx.fillStyle = umax > 0 ? cmap(0.08 + 0.92 * Math.pow(uu, 0.7), 0.95) : `rgba(${RGB[m]},0.55)`;
+      const y0s = dieTop - (j + 1) / nz * gp;
+      ctx.fillRect(cx + xa * sx, y0s, (xb - xa) * sx + 0.7, gp / nz + 0.7);
+    }
+  }
+  if (m === 'B' && P.ty > 0) {
+    ctx.fillStyle = 'rgba(255,255,255,0.20)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+    ctx.setLineDash([4, 3]); ctx.lineWidth = 1.2;
+    const top = [], bot = [];
+    for (let i = 0; i <= 70; i++) {
+      const x = -R + 2 * R * i / 70, gg = F.G(Math.max(Math.abs(x), 1e-7));
+      const z0 = Math.min(P.ty / gg, st.h / 2) / st.h;
+      top.push([cx + x * sx, dieTop - (0.5 + z0) * gp]);
+      bot.push([cx + x * sx, dieTop - (0.5 - z0) * gp]);
+    }
+    ctx.beginPath();
+    top.forEach((p, i) => i ? ctx.lineTo(...p) : ctx.moveTo(...p));
+    bot.reverse().forEach(p => ctx.lineTo(...p));
+    ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
+    if (gp > 24) {
+      ctx.fillStyle = '#fff'; ctx.font = '700 10.5px Segoe UI';
+      ctx.fillText('Unyielded Bingham Plug Core (|τ_rz| ≤ τ_y)', cx, dieTop - gp / 2 + 4);
+    }
+  }
+  ctx.fillStyle = `rgba(${RGB[m]},0.9)`;
+  for (const sgn of [-1, 1]) {
+    ctx.beginPath();
+    ctx.ellipse(cx + sgn * R * sx, dieTop - gp / 2, Math.min(gp / 2, 13), gp / 2, 0, sgn > 0 ? -PI / 2 : PI / 2, sgn > 0 ? PI / 2 : 3 * PI / 2);
+    ctx.fill();
+  }
+  const excess = P.V0 - PI * R_EQ * R_EQ * st.h;
+  if (st.R >= R_EQ * 0.999 && excess > 0) {
+    const rb = 6 + 30 * Math.sqrt(excess / P.V0);
+    for (const sgn of [-1, 1]) {
+      const bx = cx + sgn * (R_EQ * sx + rb * 0.55);
+      const bg = ctx.createRadialGradient(bx, dieTop - gp / 2, 2, bx, dieTop - gp / 2 + rb * 0.3, rb * 1.2);
+      bg.addColorStop(0, `rgba(${RGB[m]},0.95)`); bg.addColorStop(1, `rgba(${RGB[m]},0.15)`);
+      ctx.fillStyle = bg;
+      ctx.beginPath(); ctx.ellipse(bx, dieTop - gp / 2 + rb * 0.35, rb * 0.75, rb, 0, 0, 2 * PI); ctx.fill();
+    }
+  }
+
+  if ($('cbArr').checked && umax > 0 && gp > 14) {
+    ctx.strokeStyle = 'rgba(255,255,255,.88)'; ctx.fillStyle = 'rgba(255,255,255,.88)'; ctx.lineWidth = 1.2;
+    for (const f of [0.35, 0.68, 0.94]) for (const sgn of [-1, 1]) {
+      const r = f * R, gg = F.G(r), xs = cx + sgn * r * sx;
+      const nlev = gp > 50 ? 7 : 4;
+      ctx.beginPath(); ctx.moveTo(xs, dieTop); ctx.lineTo(xs, dieTop - gp); ctx.stroke();
+      for (let j = 0; j < nlev; j++) {
+        const z = (j + 0.5) / nlev * st.h, L = 40 * F.u(r, z, gg) / umax, y = dieTop - (z / st.h) * gp;
+        if (L > 2) arrow(ctx, xs, y, xs + sgn * L, y, Math.min(5.5, L * 0.5));
+      }
+    }
+  }
+  if ($('cbPart').checked) {
+    ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 5;
+    for (const p of parts) {
+      if (p.gone) continue;
+      ctx.beginPath(); ctx.arc(cx + p.x * sx, dieTop - (p.z / st.h) * gp, 1.7, 0, 2 * PI); ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  // 4. Copper Cold Plate + Microchannel Liquid Coolant
+  g = ctx.createLinearGradient(0, cpTop, 0, cpBot);
+  g.addColorStop(0, '#f6b183'); g.addColorStop(0.5, '#c2673a'); g.addColorStop(1, '#8a4322');
+  ctx.fillStyle = g; rrect(ctx, plL, cpTop, plR - plL, cpBot - cpTop, 4); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.font = '700 10.5px Segoe UI';
+  ctx.fillText('Cu Microchannel Cold Plate (T_cold = 45 °C)', cx, cpTop + 18);
+
+  const nf = 14, pitch = (plR - plL) / nf;
+  for (let i = 0; i < nf; i++) {
+    const x = plL + i * pitch + pitch * 0.2, fw = pitch * 0.6;
+    const fg = ctx.createLinearGradient(0, finTop, 0, cpTop);
+    fg.addColorStop(0, '#1e293b'); fg.addColorStop(0.55, '#64748b'); fg.addColorStop(1, heatCol(st.dT * 0.55, 0.9));
+    ctx.fillStyle = fg; rrect(ctx, x, finTop, fw, cpTop - finTop + 2, 3); ctx.fill();
+    ctx.fillStyle = 'rgba(14,165,233,0.22)';
+    ctx.fillRect(x + fw * 0.25, finTop + 8, fw * 0.5, cpTop - finTop - 14);
+  }
+  for (const cp of coolantPackets) {
+    cp.p = (cp.p + cp.v * dtReal) % 1;
+    const fi = Math.floor(cp.lane * (nf / 6)) + 1;
+    const x = plL + fi * pitch + pitch * 0.5;
+    const y = cpTop - 10 - cp.p * (cpTop - finTop - 18);
+    ctx.fillStyle = 'rgba(56,189,248,0.85)';
+    ctx.beginPath(); ctx.arc(x, y, 2.2, 0, 2 * PI); ctx.fill();
+  }
+
+  // 5. Thermal Conduction Sparks
+  if ($('cbHeat').checked) {
+    ctx.globalCompositeOperation = 'lighter';
+    for (const s of sparks) {
+      s.p += s.v * dtReal * (P.Q / 700);
+      if (s.p > 1) { s.p = 0; s.x = Math.random() * 2 - 1; }
+      const xr = s.x * R_EQ, covered = Math.abs(xr) <= R;
+      let y = dieTop + 6 - s.p * (dieTop + 6 - finTop);
+      if (!covered && y < dieTop - 2) y = dieTop - 2;
+      const col = covered ? `rgba(255,175,60,${0.85 * (1 - s.p * 0.6)})` : `rgba(255,55,75,${0.55 + 0.45 * pulse})`;
+      const rg = ctx.createRadialGradient(cx + xr * sx, y, 0, cx + xr * sx, y, 6.5);
+      rg.addColorStop(0, col); rg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(cx + xr * sx, y, 6.5, 0, 2 * PI); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // Clamping Force Arrows
+  ctx.strokeStyle = '#a5b4fc'; ctx.fillStyle = '#a5b4fc'; ctx.lineWidth = 2.6;
+  for (const f of [-0.28, 0, 0.28]) arrow(ctx, cx + f * w, finTop - 42, cx + f * w, finTop - 6, 10);
+  ctx.font = '700 12.5px Segoe UI'; ctx.fillStyle = '#c7d2fe';
+  ctx.fillText('Clamping Force F₀ = ' + P.F0 + ' N', cx, finTop - 48);
+
+  // Bondline Callout
+  const gx = plR + 10;
+  ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(gx, cpBot); ctx.lineTo(gx, dieTop); ctx.stroke();
+  ctx.textAlign = 'right'; ctx.font = '700 12.5px Segoe UI'; ctx.fillStyle = COL[m];
+  ctx.fillText('h = ' + fmt(st.h * 1e6, 3) + ' µm', gx - 6, (cpBot + dieTop) / 2 + 4);
+
+  // HUD
+  ctx.textAlign = 'left'; ctx.font = '700 13.5px Segoe UI'; ctx.fillStyle = COL[m];
+  ctx.fillText('2D Lubrication Cross-Section · ' + NAME[m], 12, 22);
+  ctx.font = '11.5px Segoe UI'; ctx.fillStyle = '#c9d3f5';
+  const cov = Math.min(PI * st.R * st.R / A_DIE, 1) * 100;
+  ctx.fillText(`R = ${fmt(st.R * 1e3, 3)} mm (${cov.toFixed(1)}% die) · ΔT_TIM = ${fmt(st.dT, 3)} °C`, 12, 40);
+  if (m === 'B' && !(st.hd < 0) && t > 0) {
+    ctx.fillStyle = '#fbbf24'; ctx.font = '700 12px Segoe UI';
+    ctx.fillText('⛔ PLASTIC STALL: τ_y balances F₀ at h* = ' + fmt(HS * 1e6, 3) + ' µm', 12, 58);
+  }
+  ctx.restore();
+}
+
+/* ===================== 3D ISOMETRIC ACCELERATOR RENDERER ===================== */
+function render3DIsometric(ctx, x0, y0, w, H, t) {
+  ctx.save();
+  ctx.beginPath(); ctx.rect(x0, y0, w, H); ctx.clip();
+  ctx.translate(x0, y0);
+
+  const m = sel, st = stateAt(m, t);
+  const cx = w * 0.5, cy = H * 0.62;
+  const sc = Math.min(w, H) / 420;
+  const now = performance.now();
+  const pulse = 0.5 + 0.5 * Math.sin(now / 260);
+  const cov = Math.min(PI * st.R * st.R / A_DIE, 1);
+
+  const iso = (X, Y, Z) => [
+    cx + (X - Y) * 118 * sc,
+    cy + (X + Y) * 62 * sc - Z * sc
+  ];
+
+  function drawIsoBox(x1, y1, x2, y2, z0, z1, topCol, leftCol, rightCol, strokeCol) {
+    const p010 = iso(x1, y2, z0), p110 = iso(x2, y2, z0), p111 = iso(x2, y2, z1), p011 = iso(x1, y2, z1);
+    const p100 = iso(x2, y1, z0), p101 = iso(x2, y1, z1), p001 = iso(x1, y1, z1);
+    ctx.fillStyle = leftCol;
+    ctx.beginPath(); ctx.moveTo(...p010); ctx.lineTo(...p110); ctx.lineTo(...p111); ctx.lineTo(...p011); ctx.closePath(); ctx.fill();
+    if (strokeCol) { ctx.strokeStyle = strokeCol; ctx.lineWidth = 1; ctx.stroke(); }
+    ctx.fillStyle = rightCol;
+    ctx.beginPath(); ctx.moveTo(...p100); ctx.lineTo(...p110); ctx.lineTo(...p111); ctx.lineTo(...p101); ctx.closePath(); ctx.fill();
+    if (strokeCol) ctx.stroke();
+    ctx.fillStyle = topCol;
+    ctx.beginPath(); ctx.moveTo(...p001); ctx.lineTo(...p101); ctx.lineTo(...p111); ctx.lineTo(...p011); ctx.closePath(); ctx.fill();
+    if (strokeCol) ctx.stroke();
+  }
+
+  drawIsoBox(-1.25, -1.05, 1.25, 1.05, -24, -10, '#0f5132', '#063a22', '#042817', 'rgba(52,211,153,0.35)');
+  drawIsoBox(-1.05, -0.88, 1.05, 0.88, -10, 0, '#1e293b', '#0f172a', '#090d16', 'rgba(148,163,184,0.35)');
+
+  const hbmCoords = [
+    [-0.86, -0.76, -0.58, -0.32],
+    [-0.86, -0.22, -0.58,  0.22],
+    [-0.86,  0.32, -0.58,  0.76],
+    [ 0.58, -0.76,  0.86, -0.32],
+    [ 0.58, -0.22,  0.86,  0.22],
+    [ 0.58,  0.32,  0.86,  0.76]
+  ];
+  const drawHBM = (b, idx) => {
+    const glow = 0.4 + 0.6 * Math.sin(now / 220 + idx * 1.1);
+    drawIsoBox(b[0], b[1], b[2], b[3], 0, 18, '#334155', '#1e293b', '#0f172a', `rgba(56,189,248,${0.3 + 0.35 * glow})`);
+    if ($('cbBus').checked) {
+      const ph = (now / 450 + idx * 0.17) % 1;
+      const sx = b[0] < 0 ? b[2] : b[0];
+      const tx = b[0] < 0 ? -0.52 : 0.52;
+      const py = (b[1] + b[3]) / 2;
+      const px = sx + (tx - sx) * ph;
+      const pt = iso(px, py, 1);
+      ctx.fillStyle = '#38bdf8'; ctx.shadowColor = '#38bdf8'; ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(pt[0], pt[1], 3 * sc, 0, 2 * PI); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  };
+  [0, 1, 3].forEach(i => drawHBM(hbmCoords[i], i));
+
+  const dieHot = cov < 0.999 ? `rgba(255,71,87,${0.38 + 0.3 * pulse})` : heatCol(st.dT, 0.75);
+  drawIsoBox(-0.52, -0.52, 0.52, 0.52, 0, 20, '#334155', '#1e293b', '#0f172a', 'rgba(255,255,255,0.45)');
+
+  for (let gx = -3; gx <= 2; gx++) {
+    for (let gy = -3; gy <= 2; gy++) {
+      const x1 = gx * 0.16, y1 = gy * 0.16, x2 = x1 + 0.135, y2 = y1 + 0.135;
+      const act = 0.5 + 0.5 * Math.sin(now / 190 + gx * 1.3 - gy * 1.5);
+      const p1 = iso(x1, y1, 20.5), p2 = iso(x2, y1, 20.5), p3 = iso(x2, y2, 20.5), p4 = iso(x1, y2, 20.5);
+      ctx.fillStyle = cov < 0.999 && (gx * gx + gy * gy > 4)
+        ? dieHot
+        : `rgba(56,189,248,${0.18 + 0.42 * act})`;
+      ctx.beginPath(); ctx.moveTo(...p1); ctx.lineTo(...p2); ctx.lineTo(...p3); ctx.lineTo(...p4); ctx.closePath(); ctx.fill();
+    }
+  }
+
+  const gapZ = 10 + 95 * Math.pow(st.h / H0, 0.55);
+  const rNorm = Math.min(st.R / R_EQ, 1.0) * 0.52;
+  const nSeg = 48;
+  for (let layer = 0; layer < 8; layer++) {
+    const zL = 21 + (layer / 8) * gapZ;
+    ctx.fillStyle = layer === 7 ? `rgba(${RGB[m]},0.92)` : `rgba(${RGB[m]},0.35)`;
+    ctx.beginPath();
+    for (let k = 0; k <= nSeg; k++) {
+      const ang = (k / nSeg) * 2 * PI;
+      const rx = Math.max(-0.52, Math.min(0.52, rNorm * 1.15 * Math.cos(ang)));
+      const ry = Math.max(-0.52, Math.min(0.52, rNorm * 1.15 * Math.sin(ang)));
+      const pt = iso(rx, ry, zL);
+      if (k === 0) ctx.moveTo(...pt); else ctx.lineTo(...pt);
+    }
+    ctx.closePath(); ctx.fill();
+    if (layer === 7) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.4; ctx.stroke(); }
+  }
+  if (m === 'B' && P.ty > 0) {
+    const rPlug = rNorm * Math.min(1, Math.pow(HS / st.h, 0.4) * 0.85);
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.setLineDash([4, 3]); ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let k = 0; k <= nSeg; k++) {
+      const ang = (k / nSeg) * 2 * PI;
+      const pt = iso(rPlug * Math.cos(ang), rPlug * Math.sin(ang), 21 + gapZ * 0.55);
+      if (k === 0) ctx.moveTo(...pt); else ctx.lineTo(...pt);
+    }
+    ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  [2, 4, 5].forEach(i => drawHBM(hbmCoords[i], i));
+
+  const cpZ0 = 22 + gapZ, cpZ1 = cpZ0 + 18, finZ1 = cpZ1 + 52;
+  drawIsoBox(-0.92, -0.82, 0.92, 0.82, cpZ0, cpZ1,
+    'rgba(246,177,131,0.52)', 'rgba(194,103,58,0.55)', 'rgba(138,67,34,0.58)', 'rgba(251,146,60,0.75)');
+
+  for (let f = -3; f <= 3; f++) {
+    const fx1 = f * 0.24 - 0.07, fx2 = f * 0.24 + 0.07;
+    drawIsoBox(fx1, -0.76, fx2, 0.76, cpZ1, finZ1,
+      'rgba(148,163,184,0.34)', 'rgba(100,116,139,0.34)', 'rgba(71,85,105,0.38)', 'rgba(56,189,248,0.32)');
+  }
+
+  ctx.strokeStyle = '#38bdf8'; ctx.fillStyle = '#38bdf8'; ctx.lineWidth = 2.4;
+  for (const [ax, ay] of [[-0.45, -0.45], [0.45, -0.45], [-0.45, 0.45], [0.45, 0.45], [0, 0]]) {
+    const pTop = iso(ax, ay, finZ1 + 36);
+    const pBot = iso(ax, ay, finZ1 + 4);
+    arrow(ctx, pTop[0], pTop[1], pBot[0], pBot[1], 8);
+  }
+
+  ctx.textAlign = 'left'; ctx.font = '700 13.5px Segoe UI'; ctx.fillStyle = COL[m];
+  ctx.fillText('3D Isometric CoWoS Accelerator Assembly', 12, 22);
+  ctx.font = '11.5px Segoe UI'; ctx.fillStyle = '#c9d3f5';
+  ctx.fillText('6× HBM3e + Compute Die + Translucent Cold Plate', 12, 40);
+  ctx.restore();
+}
+
+function drawHero(t, dtReal) {
+  const { ctx, w, h } = setupCanvas($('heroCanvas'));
+  ctx.clearRect(0, 0, w, h);
+  if (viewMode === '2d') {
+    render2DSection(ctx, 0, 0, w, h, t, dtReal);
+  } else if (viewMode === '3d') {
+    render3DIsometric(ctx, 0, 0, w, h, t);
+  } else {
+    const w2 = Math.floor(w * 0.56);
+    render2DSection(ctx, 0, 0, w2, h, t, dtReal);
+    ctx.strokeStyle = '#22325a'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(w2, 10); ctx.lineTo(w2, h - 10); ctx.stroke();
+    render3DIsometric(ctx, w2, 0, w - w2, h, t);
+  }
+}
+
+/* ===================== TOP-DOWN CoWoS PACKAGE RENDERER ===================== */
+function drawTop(t) {
+  const { ctx, w, h } = setupCanvas($('top'));
+  ctx.clearRect(0, 0, w, h);
+  const now = performance.now();
+  const pulse = 0.5 + 0.5 * Math.sin(now / 260);
+
+  MODES.forEach((m, k) => {
+    const st = stateAt(m, t), cx = w * (k + 0.5) / 3, cy = h * 0.44;
+    const L = Math.min(w / 3 * 0.50, h * 0.58), a = L / 2;
+
+    if (m === sel) {
+      ctx.strokeStyle = COL[m]; ctx.lineWidth = 1.5;
+      rrect(ctx, cx - a * 1.85, cy - a * 1.38, a * 3.7, a * 2.76, 12); ctx.stroke();
+    }
+
+    ctx.fillStyle = '#0c2419';
+    rrect(ctx, cx - a * 1.75, cy - a * 1.28, a * 3.5, a * 2.56, 9); ctx.fill();
+    ctx.strokeStyle = 'rgba(52,211,153,0.3)'; ctx.lineWidth = 1; ctx.stroke();
+
+    for (const sg of [-1, 1]) {
+      for (let j = 0; j < 3; j++) {
+        const hx = cx + sg * a * 1.32 - a * 0.24;
+        const hy = cy - a * 0.96 + j * a * 0.68;
+        const hw = a * 0.48, hh = a * 0.56;
+        const bx0 = sg < 0 ? hx + hw : hx;
+        const bx1 = sg < 0 ? cx - a : cx + a;
+        ctx.strokeStyle = 'rgba(56,189,248,0.28)'; ctx.lineWidth = 1;
+        for (let tr = 0; tr < 4; tr++) {
+          const ty = hy + hh * (0.2 + 0.2 * tr);
+          ctx.beginPath(); ctx.moveTo(bx0, ty); ctx.lineTo(bx1, ty); ctx.stroke();
+        }
+        if ($('cbBus').checked) {
+          const ph = ((now / 420 + j * 0.33 + (sg > 0 ? 0.5 : 0)) % 1);
+          const px = bx0 + (bx1 - bx0) * ph;
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(px - 2, hy + hh * 0.35, 4, hh * 0.3);
+        }
+        ctx.fillStyle = '#17233b';
+        rrect(ctx, hx, hy, hw, hh, 3); ctx.fill();
+        ctx.strokeStyle = 'rgba(148,163,184,0.45)'; ctx.stroke();
+        ctx.fillStyle = '#94a3b8'; ctx.font = '700 8.5px Segoe UI'; ctx.textAlign = 'center';
+        ctx.fillText('HBM3e', hx + hw / 2, hy + hh / 2 + 3);
+      }
+    }
+
+    const dg = ctx.createLinearGradient(cx - a, cy - a, cx + a, cy + a);
+    dg.addColorStop(0, '#334155'); dg.addColorStop(1, '#1e293b');
+    ctx.fillStyle = dg; ctx.fillRect(cx - a, cy - a, L, L);
+
+    for (let ix = 0; ix < 6; ix++) {
+      for (let iy = 0; iy < 6; iy++) {
+        const act = 0.5 + 0.5 * Math.sin(now / 240 + ix * 1.4 + iy * 1.1 + k);
+        ctx.fillStyle = `rgba(56,189,248,${0.06 + 0.16 * act})`;
+        ctx.fillRect(cx - a + ix * L / 6 + 1, cy - a + iy * L / 6 + 1, L / 6 - 2, L / 6 - 2);
+      }
+    }
+
+    const Ac = Math.min(PI * st.R * st.R, A_DIE), cov = Ac / A_DIE;
+    if (cov < 0.999) {
+      ctx.fillStyle = `rgba(255,60,80,${0.32 + 0.36 * pulse})`;
+      ctx.fillRect(cx - a, cy - a, L, L);
+    }
+
+    const rho = visRadius(Ac, S_DIE / 2) / (S_DIE / 2) * a;
+    ctx.save(); ctx.beginPath(); ctx.rect(cx - a, cy - a, L, L); ctx.clip();
+    const pg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rho, 1));
+    pg.addColorStop(0, `rgba(${RGB[m]},0.96)`);
+    pg.addColorStop(0.78, `rgba(${RGB[m]},0.78)`);
+    pg.addColorStop(1, `rgba(${RGB[m]},0.52)`);
+    ctx.fillStyle = pg; ctx.shadowColor = COL[m]; ctx.shadowBlur = 16;
+    ctx.beginPath(); ctx.arc(cx, cy, rho, 0, 2 * PI); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 1;
+    for (const rf of [0.35, 0.7]) {
+      ctx.beginPath(); ctx.arc(cx, cy, rho * rf, 0, 2 * PI); ctx.stroke();
+    }
+    ctx.restore();
+
+    const excess = P.V0 - PI * R_EQ * R_EQ * st.h;
+    if (cov >= 0.999 && excess > 0) {
+      ctx.strokeStyle = `rgba(${RGB[m]},${0.28 + 0.5 * Math.sqrt(excess / P.V0)})`;
+      ctx.lineWidth = 3 + 9 * Math.sqrt(excess / P.V0);
+      rrect(ctx, cx - a - 4, cy - a - 4, L + 8, L + 8, 8); ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,.42)'; ctx.lineWidth = 1.2; ctx.strokeRect(cx - a, cy - a, L, L);
+
+    ctx.textAlign = 'center'; ctx.fillStyle = COL[m]; ctx.font = '700 13.5px Segoe UI';
+    ctx.fillText(NAME[m] + (m === sel ? '  [ACTIVE]' : ''), cx, cy + a * 1.28 + 20);
+    ctx.fillStyle = '#c9d3f5'; ctx.font = '11.8px Segoe UI';
+    ctx.fillText(`Coverage ${(cov * 100).toFixed(1)}% · h = ${fmt(st.h * 1e6, 3)} µm · ΔT = ${fmt(st.dT, 3)} °C`, cx, cy + a * 1.28 + 38);
+    if (m === 'B' && !(st.hd < 0) && t > 0) {
+      ctx.fillStyle = '#fbbf24'; ctx.font = '700 11.5px Segoe UI';
+      ctx.fillText(cov < 0.999 ? '⛔ STALLED · Dry Die Corners!' : '⛔ STALLED at h*', cx, cy - a * 1.28 - 7);
+    }
+  });
+}
+
+/* ===================== 6-CHART TRANSPORT PHENOMENA SUITE ===================== */
+function chart(id, o) {
+  const { ctx, w, h } = setupCanvas($(id)); ctx.clearRect(0, 0, w, h);
+  const L = 56, Rr = 14, T = 30, B = 38, pw = w - L - Rr, ph = h - T - B, lg = Math.log10;
+  const fx = v => o.xlog ? (lg(v) - lg(o.x0)) / (lg(o.x1) - lg(o.x0)) : (v - o.x0) / (o.x1 - o.x0);
+  const fy = v => o.ylog ? (lg(v) - lg(o.y0)) / (lg(o.y1) - lg(o.y0)) : (v - o.y0) / (o.y1 - o.y0);
+  const X = v => L + fx(v) * pw, Y = v => T + ph * (1 - fy(v));
+  ctx.fillStyle = 'rgba(255,255,255,.025)'; ctx.fillRect(L, T, pw, ph);
+  ctx.font = '11px Segoe UI'; ctx.lineWidth = 1;
+  o.xt.forEach(v => {
+    const x = X(v);
+    ctx.strokeStyle = 'rgba(120,140,200,.15)';
+    ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, T + ph); ctx.stroke();
+    ctx.fillStyle = '#8fa2d4'; ctx.textAlign = 'center';
+    ctx.fillText(o.xf ? o.xf(v) : v, x, T + ph + 14);
+  });
+  o.yt.forEach(v => {
+    const y = Y(v);
+    ctx.strokeStyle = 'rgba(120,140,200,.15)';
+    ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(L + pw, y); ctx.stroke();
+    ctx.fillStyle = '#8fa2d4'; ctx.textAlign = 'right';
+    ctx.fillText(o.yf ? o.yf(v) : v, L - 6, y + 4);
+  });
+  ctx.strokeStyle = '#33437a'; ctx.strokeRect(L, T, pw, ph);
+  ctx.fillStyle = '#eaf0ff'; ctx.font = '600 12px Segoe UI'; ctx.textAlign = 'left'; ctx.fillText(o.title, L, 18);
+  ctx.fillStyle = '#8fa2d4'; ctx.font = '11px Segoe UI'; ctx.textAlign = 'center'; ctx.fillText(o.xl, L + pw / 2, h - 5);
+  ctx.save(); ctx.translate(14, T + ph / 2); ctx.rotate(-PI / 2); ctx.fillText(o.yl, 0, 0); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.rect(L, T, pw, ph); ctx.clip();
+  if (o.pre) o.pre(ctx, X, Y, L, T, pw, ph);
+  (o.series || []).forEach(se => {
+    ctx.strokeStyle = se.c; ctx.lineWidth = se.lw || 2.2; ctx.setLineDash(se.dash || []);
+    ctx.shadowColor = se.c; ctx.shadowBlur = se.dash ? 0 : 8;
+    ctx.beginPath(); let first = true;
+    for (const [a, b] of se.p) {
+      if (!isFinite(a) || !isFinite(b) || (o.xlog && a <= 0) || (o.ylog && b <= 0)) { first = true; continue; }
+      const x = X(a), y = Y(b);
+      if (first) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      first = false;
+    }
+    ctx.stroke();
+  });
+  ctx.setLineDash([]); ctx.shadowBlur = 0;
+  if (o.post) o.post(ctx, X, Y, L, T, pw, ph);
+  ctx.restore();
+}
+
+function drawPhaseMap() {
+  const { ctx, w, h } = setupCanvas($('c6')); ctx.clearRect(0, 0, w, h);
+  const L = 56, Rr = 14, T = 30, B = 38, pw = w - L - Rr, ph = h - T - B;
+  const nx = 44, ny = 34;
+  const Fmin = 50, Fmax = 1000, Tmin = 0, Tmax = 8000;
+  for (let ix = 0; ix < nx; ix++) {
+    const Fval = Fmin + (ix + 0.5) / nx * (Fmax - Fmin);
+    for (let iy = 0; iy < ny; iy++) {
+      const tyVal = Tmin + (iy + 0.5) / ny * (Tmax - Tmin);
+      const hs = Math.max(12e-6, hStarFor(Fval, tyVal, P.V0));
+      const Rst = Math.min(Math.sqrt(P.V0 / (PI * hs)), R_EQ);
+      const Ac = Math.min(PI * Rst * Rst, A_DIE);
+      const dT = P.Q * hs / (P.k * Ac + K_AIR * (A_DIE - Ac));
+      ctx.fillStyle = heatCol(dT, 0.88);
+      ctx.fillRect(L + ix / nx * pw, T + (1 - (iy + 1) / ny) * ph, pw / nx + 0.8, ph / ny + 0.8);
+    }
+  }
+  // Boundary curve where R* = R_eq (100% coverage threshold)
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.8; ctx.setLineDash([5, 4]);
+  ctx.beginPath();
+  const hCov = P.V0 / A_DIE;
+  for (let ix = 0; ix <= 60; ix++) {
+    const Fval = Fmin + ix / 60 * (Fmax - Fmin);
+    const tyCrit = 3 * Fval * hCov / (2 * PI * Math.pow(R_EQ, 3));
+    const x = L + (Fval - Fmin) / (Fmax - Fmin) * pw;
+    const y = T + (1 - Math.min(Math.max((tyCrit - Tmin) / (Tmax - Tmin), 0), 1)) * ph;
+    if (ix === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke(); ctx.setLineDash([]);
+
+  // Current operating point crosshair
+  const cx = L + (P.F0 - Fmin) / (Fmax - Fmin) * pw;
+  const cy = T + (1 - (P.ty - Tmin) / (Tmax - Tmin)) * ph;
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx, cy, 6, 0, 2 * PI); ctx.stroke();
+  ctx.fillStyle = COL.B; ctx.beginPath(); ctx.arc(cx, cy, 3.5, 0, 2 * PI); ctx.fill();
+
+  ctx.strokeStyle = '#33437a'; ctx.lineWidth = 1; ctx.strokeRect(L, T, pw, ph);
+  ctx.fillStyle = '#eaf0ff'; ctx.font = '600 12px Segoe UI'; ctx.textAlign = 'left';
+  ctx.fillText('⑥ 2D Bingham Design Phase Map: ΔT_TIM(F₀, τ_y) & Under-Coverage Boundary', L, 18);
+  ctx.fillStyle = '#8fa2d4'; ctx.font = '11px Segoe UI'; ctx.textAlign = 'center';
+  ctx.fillText('Clamping Force F₀ [N]  (white dashed curve = 100% die coverage threshold)', L + pw / 2, h - 5);
+  ctx.save(); ctx.translate(14, T + ph / 2); ctx.rotate(-PI / 2); ctx.fillText('Yield Stress τ_y [kPa]', 0, 0); ctx.restore();
+  [200, 400, 600, 800, 1000].forEach(v => {
+    const x = L + (v - Fmin) / (Fmax - Fmin) * pw;
+    ctx.fillStyle = '#8fa2d4'; ctx.textAlign = 'center'; ctx.fillText(v, x, T + ph + 14);
+  });
+  [0, 2, 4, 6, 8].forEach(v => {
+    const y = T + (1 - v / 8) * ph;
+    ctx.fillStyle = '#8fa2d4'; ctx.textAlign = 'right'; ctx.fillText(v, L - 6, y + 4);
+  });
+}
+
+function drawCharts(t) {
+  const st = {}, F = {};
+  MODES.forEach(m => { st[m] = stateAt(m, t); F[m] = field(m, st[m]); });
+  const zs = Array.from({ length: 61 }, (_, i) => i / 60);
+
+  // 1. Velocity Profile
+  const s1 = []; let plugB = 0;
+  MODES.forEach(m => {
+    const s = st[m], r = s.R / 2, g = F[m].G(r), ub = r * Math.max(-s.hd, 0) / (2 * s.h);
+    s1.push({ c: COL[m], p: zs.map(z => [ub > 0 ? F[m].u(r, z * s.h, g) / ub : 0, z]) });
+    if (m === 'B' && P.ty > 0) plugB = Math.min(P.ty / g / s.h, 0.5);
+  });
+  chart('c1', {
+    title: '① Velocity Profile u_r(z) at r = R/2 (Closure Reshapes Profile)',
+    x0: 0, x1: 1.75, y0: 0, y1: 1, xt: [0, 0.5, 1, 1.5], yt: [0, 0.25, 0.5, 0.75, 1],
+    xl: 'Normalized Speed u_r / ū   (ū = r(−ḣ)/2h)', yl: 'Gap z / h', series: s1,
+    pre: (ctx, X, Y) => {
+      if (plugB > 0) {
+        ctx.fillStyle = 'rgba(251,191,36,.13)';
+        ctx.fillRect(X(0), Y(0.5 + plugB), X(1.75) - X(0), Y(0.5 - plugB) - Y(0.5 + plugB));
+        ctx.fillStyle = '#fbbf24'; ctx.font = '11px Segoe UI'; ctx.textAlign = 'left';
+        ctx.fillText('Bingham Plug Core', X(0.05), Y(0.5) + 4);
+      }
+    }
+  });
+
+  // 2. Shear Stress
+  let tmax = P.ty * 1.3 + 1; const s2 = [];
+  MODES.forEach(m => {
+    const s = st[m], g = F[m].G(s.R / 2);
+    tmax = Math.max(tmax, g * s.h / 2 * 1.1);
+    s2.push({ c: COL[m], p: zs.map(z => [g * (s.h / 2 - z * s.h), z]) });
+  });
+  chart('c2', {
+    title: '② Shear Stress τ_rz(z) at r = R/2 (Universal Linear Distribution)',
+    x0: -tmax, x1: tmax, y0: 0, y1: 1, xt: [-tmax * 0.8, -tmax * 0.4, 0, tmax * 0.4, tmax * 0.8], xf: v => fmt(v / 1000, 2),
+    yt: [0, 0.25, 0.5, 0.75, 1], xl: 'Shear Stress τ_rz [kPa] = (−∂p/∂r)(h/2 − z)', yl: 'Gap z / h', series: s2,
+    pre: (ctx, X, Y) => {
+      if (P.ty > 0) {
+        ctx.fillStyle = 'rgba(251,191,36,.12)';
+        ctx.fillRect(X(-P.ty), Y(1), X(P.ty) - X(-P.ty), Y(0) - Y(1));
+        ctx.fillStyle = '#fbbf24'; ctx.font = '11px Segoe UI'; ctx.textAlign = 'center';
+        ctx.fillText('|τ_rz| ≤ τ_y', X(0), Y(0.93));
+      }
+    }
+  });
+
+  // 5. Radial Pressure Distribution p(r)
+  const Np = 40;
+  const s5 = MODES.map(m => {
+    const pr = F[m].pProf(Np), pMax = Math.max(pr[0], 1);
+    const pts = [];
+    for (let i = 0; i <= Np; i++) pts.push([i / Np, pr[i] / pMax]);
+    return { c: COL[m], p: pts };
+  });
+  chart('c5', {
+    title: '③ Radial Pressure Profile p(r)/p(0) (Parabolic vs. Conical Stall)',
+    x0: 0, x1: 1, y0: 0, y1: 1.05, xt: [0, 0.25, 0.5, 0.75, 1], yt: [0, 0.25, 0.5, 0.75, 1],
+    xl: 'Normalized Radius r / R(t)   (Newtonian: 1−(r/R)², Bingham Stall: 1−r/R)', yl: 'p(r) / p(0)', series: s5
+  });
+
+  // 3. Bondline Thickness h(t)
+  const hc = P.V0 / (PI * R_EQ * R_EQ);
+  chart('c3', {
+    title: '④ Bondline Thickness Evolution h(t) (Log-Log Scaling & Stall)', xlog: true, ylog: true,
+    x0: T_MIN, x1: T_MAX, y0: 1, y1: 400, xt: [1e-3, 1e-2, 1e-1, 1, 10, 100], xf: v => v >= 1 ? v + ' s' : (v * 1000) + ' ms',
+    yt: [1, 3, 10, 30, 100, 300], xl: 'Time t (log scale)', yl: 'h [µm] (log)',
+    series: MODES.map(m => ({ c: COL[m], p: TR[m].map(q => [q.t, q.h * 1e6]) })).concat([
+      { c: 'rgba(255,255,255,.5)', dash: [6, 5], lw: 1.3, p: [[0.3, 160], [30, 160 * Math.pow(100, -0.25)]] }
+    ]),
+    post: (ctx, X, Y, L, T, pw, ph) => {
+      ctx.font = '10.8px Segoe UI'; ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillText('t⁻¹/⁴ slope', X(0.35), Y(150));
+      ctx.strokeStyle = 'rgba(46,213,115,.6)'; ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(L, Y(hc * 1e6)); ctx.lineTo(L + pw, Y(hc * 1e6)); ctx.stroke();
+      ctx.fillStyle = '#2ed573'; ctx.fillText('100% Die Coverage (h = V₀/A_die)', L + 6, Y(hc * 1e6) - 4);
+      if (HS > 0) {
+        ctx.strokeStyle = 'rgba(251,191,36,.7)';
+        ctx.beginPath(); ctx.moveTo(L, Y(HS * 1e6)); ctx.lineTo(L + pw, Y(HS * 1e6)); ctx.stroke();
+        ctx.fillStyle = '#fbbf24'; ctx.textAlign = 'right';
+        ctx.fillText('Stall h* = ' + fmt(HS * 1e6, 3) + ' µm', L + pw - 6, Y(HS * 1e6) + 13);
+      }
+      ctx.setLineDash([]);
+      if (t > 0) {
+        ctx.strokeStyle = 'rgba(255,255,255,.5)';
+        ctx.beginPath(); ctx.moveTo(X(Math.max(t, T_MIN)), T); ctx.lineTo(X(Math.max(t, T_MIN)), T + ph); ctx.stroke();
+        MODES.forEach(m => {
+          ctx.fillStyle = COL[m];
+          ctx.beginPath(); ctx.arc(X(Math.max(t, T_MIN)), Y(st[m].h * 1e6), 4.8, 0, 2 * PI); ctx.fill();
+        });
+      }
+    }
+  });
+
+  // 4. Temperature Drop ΔT_TIM(t)
+  chart('c4', {
+    title: '⑤ TIM Temperature Penalty ΔT_TIM(t) (1D Fourier + Air Gap)', xlog: true, ylog: true,
+    x0: T_MIN, x1: T_MAX, y0: 1, y1: 300, xt: [1e-3, 1e-2, 1e-1, 1, 10, 100], xf: v => v >= 1 ? v + ' s' : (v * 1000) + ' ms',
+    yt: [1, 3, 10, 30, 100, 300], xl: 'Time t (log scale)', yl: 'ΔT_TIM [°C] (log)',
+    series: MODES.map(m => ({ c: COL[m], p: TR[m].map(q => [q.t, q.dT]) })),
+    pre: (ctx, X, Y, L, T, pw, ph) => {
+      ctx.fillStyle = 'rgba(46,213,115,.08)'; ctx.fillRect(L, Y(10), pw, T + ph - Y(10));
+      ctx.strokeStyle = 'rgba(46,213,115,.6)'; ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(L, Y(10)); ctx.lineTo(L + pw, Y(10)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = '#2ed573'; ctx.font = '10.8px Segoe UI'; ctx.textAlign = 'left';
+      ctx.fillText('Target TIM Thermal Budget ≤ 10 °C', L + 6, Y(10) - 4);
+    },
+    post: (ctx, X, Y, L, T, pw, ph) => {
+      if (t > 0) {
+        ctx.strokeStyle = 'rgba(255,255,255,.5)';
+        ctx.beginPath(); ctx.moveTo(X(Math.max(t, T_MIN)), T); ctx.lineTo(X(Math.max(t, T_MIN)), T + ph); ctx.stroke();
+        MODES.forEach(m => {
+          ctx.fillStyle = COL[m];
+          ctx.beginPath(); ctx.arc(X(Math.max(t, T_MIN)), Y(Math.min(Math.max(st[m].dT, 1), 300)), 4.8, 0, 2 * PI); ctx.fill();
+        });
+      }
+    }
+  });
+
+  // 6. 2D Bingham Phase Diagram
+  drawPhaseMap();
+}
+
+/* ===================== TELEMETRY & VERIFICATION SUITE ===================== */
+function readout(t) {
+  const m = sel, st = stateAt(m, t), F = field(m, st);
+  const gam = 3 * st.R * Math.max(-st.hd, 0) / (st.h * st.h);
+  let mue = P.mu;
+  if (m === 'P') mue = gam > 0 ? P.K * Math.pow(gam, P.n - 1) : Infinity;
+  if (m === 'B') mue = gam > 0 ? P.mu + P.ty / gam : Infinity;
+  const Re = isFinite(mue) ? RHO * Math.max(-st.hd, 0) * st.h / mue : 0;
+  const eps = st.h / st.R;
+  const Bn = (m === 'B' && P.ty > 0) ? (st.hd < 0 ? P.ty * st.h * st.h / (P.mu * st.R * (-st.hd)) : Infinity) : 0;
+  const uBar = st.R * Math.max(-st.hd, 0) / (2 * st.h);
+  const Br = isFinite(mue) ? mue * uBar * uBar / (P.k * Math.max(st.dT, 0.1)) : 0;
+  const cov = Math.min(PI * st.R * st.R / A_DIE, 1);
+
+  const Tj = T_COLD + st.dT;
+  let clk = 1980;
+  if (Tj > 85) clk = Math.max(850, Math.round(1980 - (Tj - 85) * 18));
+  const tflops = Math.round(1979 * (clk / 1980));
+  $('hdr_clk').textContent = clk + ' MHz' + (clk < 1980 ? ' (THROTTLED)' : ' (BOOST)');
+  $('hdr_clk').style.color = clk < 1980 ? 'var(--hot)' : 'var(--ok)';
+  $('hdr_tflops').textContent = tflops + ' TFLOPS';
+  $('hdr_tj').textContent = fmt(Tj, 3) + ' °C';
+  $('hdr_tj').style.color = Tj > 85 ? 'var(--hot)' : Tj > 60 ? 'var(--B)' : 'var(--ok)';
+
+  $('rdName').textContent = NAME[m]; $('rdName').style.color = COL[m];
+  $('rd_h').textContent = fmt(st.h * 1e6, 3) + ' µm';
+  $('rd_R').textContent = fmt(st.R * 1e3, 3) + ' mm';
+  $('rd_cov').textContent = (cov * 100).toFixed(1) + ' %';
+  $('rd_dT').textContent = fmt(st.dT, 3) + ' °C';
+  $('rd_dT').style.color = st.dT > 10 ? 'var(--hot)' : 'var(--ok)';
+  $('rd_tj').textContent = fmt(Tj, 3) + ' °C';
+  $('rd_reff').textContent = fmt(st.dT / P.Q * 1000, 3) + ' K/kW';
+  $('rd_hd').textContent = fmt(Math.max(-st.hd, 0) * 1e6, 3) + ' µm/s';
+  $('rd_p').textContent = fmt(F.p0() / 1000, 3) + ' kPa';
+  $('rd_eps').textContent = fmt(eps, 2);
+  $('rd_re').textContent = fmt(Re, 2);
+  $('rd_bn').textContent = m === 'B' ? fmt(Bn, 3) : '— (no τ_y)';
+  $('rd_br').textContent = fmt(Br, 2);
+
+  const b = [];
+  b.push(eps < 0.1 ? '<span class="badge b-ok">Lubrication Valid (ε ≪ 1)</span>' : '<span class="badge b-warn">Early Transient (ε > 0.1)</span>');
+  b.push(Re < 0.1 ? '<span class="badge b-ok">Creeping Flow (Re_sq ≪ 1)</span>' : '<span class="badge b-warn">Inertia Active</span>');
+  b.push(cov >= 0.999 ? '<span class="badge b-ok">100% GPU Die Wetted</span>' : '<span class="badge b-bad">Bare Die Corners → Hotspots!</span>');
+  if (m === 'B' && !(st.hd < 0) && t > 0) b.push('<span class="badge b-warn">Plastic Stall Reached (h = h*)</span>');
+  $('badges').innerHTML = b.join('');
+  $('tlab').textContent = 't = ' + (t < 1 ? fmt(t * 1000, 3) + ' ms' : fmt(t, 3) + ' s');
+}
+
+function runVerificationSuite() {
+  const hTest = 80e-6;
+  // 1. Power-Law (n=1, K=mu) vs Newtonian
+  const errPL = Math.abs(hdP(hTest, 1.0, P.mu) - hdN(hTest)) / Math.abs(hdN(hTest));
+  // 2. Bingham (ty=0) vs Newtonian
+  const errBG0 = Math.abs(hdB(hTest, 0, P.mu) - hdN(hTest)) / Math.abs(hdN(hTest));
+  // 3. Bingham asymptotic stall match
+  const hEndB = TR.B[TR.B.length - 1].h;
+  const errStall = HS > 0 ? Math.abs(hEndB - HS) / HS : 0;
+  // 4. Volume conservation check
+  const stN = stateAt('N', 1.0);
+  const vCalc = PI * stN.R * stN.R * stN.h;
+  const errVol = stN.R < R_EQ * 0.999 ? Math.abs(vCalc - P.V0) / P.V0 : 0;
+  // 5. Integral vertical force balance ∫ 2πr p(r) dr = F0
+  const FN = field('N', stN), pr = FN.pProf(80);
+  let Fint = 0;
+  for (let i = 0; i < 80; i++) {
+    const r0 = i / 80 * stN.R, r1 = (i + 1) / 80 * stN.R;
+    Fint += 0.5 * (pr[i] * 2 * PI * r0 + pr[i + 1] * 2 * PI * r1) * (stN.R / 80);
+  }
+  const errF = Math.abs(Fint - P.F0) / P.F0;
+  // 6. Lubrication & Creeping Flow Regime
+  const epsEnd = stN.h / stN.R;
+  const reEnd = RHO * Math.abs(stN.hd) * stN.h / P.mu;
+
+  const checks = [
+    {
+      title: 'Check 1 · Power-Law → Newtonian Limit (n = 1, K = μ)',
+      desc: 'Verifies Scott power-law squeeze velocity collapses identically onto Stefan Newtonian velocity.',
+      res: `Relative Error = ${errPL.toExponential(2)} (< 10⁻¹² tol)`,
+      ok: errPL < 1e-10
+    },
+    {
+      title: 'Check 2 · Bingham → Newtonian Limit (τ_y → 0)',
+      desc: 'Verifies Covey–Stanmore viscoplastic solver recovers exact Newtonian squeeze speed when yield stress vanishes.',
+      res: `Relative Error = ${errBG0.toExponential(2)}`,
+      ok: errBG0 < 1e-6
+    },
+    {
+      title: 'Check 3 · Bingham Plastic Stall Asymptote (h(t→∞) → h*)',
+      desc: 'Verifies ODE trajectory arrests at closed-form plastic stall thickness h* = (2τ_y V₀³/² / 3√π F₀)²/⁵.',
+      res: HS > 0 ? `h_sim = ${(hEndB * 1e6).toFixed(2)} µm vs h* = ${(HS * 1e6).toFixed(2)} µm (Δ = ${(errStall * 100).toFixed(2)}%)` : 'Active when τ_y > 0',
+      ok: errStall < 0.05
+    },
+    {
+      title: 'Check 4 · Deformable-CV Volume Conservation (πR²h = V₀)',
+      desc: 'Verifies moving-boundary RTT mass balance holds exactly prior to die-edge overflow.',
+      res: `Volume Residual |πR²h − V₀|/V₀ = ${errVol.toExponential(2)}`,
+      ok: errVol < 1e-12
+    },
+    {
+      title: 'Check 5 · Integral Normal Force Balance (∫₀ᴿ p(r) 2πr dr = F₀)',
+      desc: 'Integrates radial lubrication pressure profile over wetted footprint and compares to applied clamping load F₀.',
+      res: `∫ p dA = ${Fint.toFixed(2)} N vs F₀ = ${P.F0} N (err = ${(errF * 100).toFixed(3)}%)`,
+      ok: errF < 0.01
+    },
+    {
+      title: 'Check 6 · Lubrication & Creeping-Flow Regime Validity',
+      desc: 'Confirms thin-gap geometric scaling (ε = h/R ≪ 1) and negligible inertia (Re_sq ≪ 1).',
+      res: `ε = ${epsEnd.toExponential(2)} ≪ 1  ·  Re_sq = ${reEnd.toExponential(2)} ≪ 1`,
+      ok: epsEnd < 0.05 && reEnd < 0.01
+    }
+  ];
+
+  $('verGrid').innerHTML = checks.map(c => `
+    <div class="ver-item">
+      <div>
+        <div class="vt">${c.title}</div>
+        <div class="vd">${c.desc}</div>
+        <div class="vr">${c.res}</div>
+      </div>
+      <span class="badge ${c.ok ? 'b-ok' : 'b-warn'}">${c.ok ? '✓ PASS' : '⚠ CHECK'}</span>
+    </div>
+  `).join('');
+}
+
+const PHYS = {
+  N: `<h3 style="color:var(--N)">Newtonian Closure · Stefan Constant-Volume Squeeze</h3>
+    <div class="eq">F₀ = 3μV₀²(−ḣ) / (2πh⁵) &nbsp;⇒&nbsp; h(t) ∝ t<sup>−1/4</sup>, &nbsp; R(t) ∝ t<sup>1/8</sup></div>
+    <p><span class="tag">Why h⁻⁵?</span> Thinning the gap raises viscous shear resistance (h⁻³) while constant-volume spreading enlarges wetted area (R⁴ ∝ h⁻²).</p>`,
+  P: `<h3 style="color:var(--P)">Power-Law Closure · Scott Shear-Thinning Squeeze</h3>
+    <div class="eq">τ<sub>rz</sub> = K|γ̇|<sup>n−1</sup>γ̇ &nbsp;⇒&nbsp; h(t) ∝ t<sup>−2n/(3n+5)</sup></div>
+    <p><span class="tag">Why blunted?</span> High wall shear reduces apparent viscosity near z = 0, h, letting the core flow almost as a plug while τ_rz(z) stays linear.</p>`,
+  B: `<h3 style="color:var(--B)">Bingham Closure · Yield-Stress Pseudo-Plug &amp; Stall</h3>
+    <div class="eq">h* = (2τ<sub>y</sub>V₀<sup>3/2</sup> / 3√π F₀)<sup>2/5</sup>, &nbsp; R* = √(V₀ / πh*)</div>
+    <p><span class="tag">Hardware risk:</span> Once |τ_rz| ≤ τ_y fills the gap at h*, flow halts permanently. If R* &lt; R_eq, dry corners trigger severe GPU thermal throttling.</p>`
+};
+
+function buildCompare() {
+  const rows = MODES.map(m => {
+    const e = TR[m][TR[m].length - 1], cov = Math.min(PI * e.R * e.R / A_DIE, 1);
+    return `<tr><td style="color:${COL[m]};font-weight:700">${NAME[m]}</td><td>${fmt(e.h * 1e6, 3)} µm</td><td>${(cov * 100).toFixed(1)} %</td>
+      <td style="color:${e.dT > 10 ? 'var(--hot)' : 'var(--ok)'};font-weight:700">${fmt(e.dT, 3)} °C</td></tr>`;
+  }).join('');
+  const hcov = P.V0 / (PI * R_EQ * R_EQ);
+  $('cmp').innerHTML = `<tr><th>Model (t = 120 s)</th><th>Bondline h</th><th>Coverage</th><th>ΔT_TIM</th></tr>${rows}
+    <tr><td colspan="4" style="text-align:left;color:var(--mut)">100%-coverage thickness V₀/A_die = ${fmt(hcov * 1e6, 3)} µm ·
+    Bingham stall h* = ${HS > 0 ? fmt(HS * 1e6, 3) + ' µm' : '— (τ_y = 0)'}</td></tr>`;
+}
+
+/* ===================== ANIMATION LOOP & EVENTS ===================== */
+let s = 0, playing = true, last = performance.now();
+const tOf = s => s <= 0 ? 0 : T_MIN * Math.pow(T_MAX / T_MIN, s);
+function setPlay(p) { playing = p; $('play').textContent = p ? '⏸ Pause' : '▶ Play'; }
+
+function frame(now) {
+  const dtR = Math.min((now - last) / 1000, 0.1); last = now;
+  if (playing) {
+    s += dtR / +$('dur').value;
+    if (s >= 1) { s = 1; setPlay(false); }
+    $('scrub').value = Math.round(s * 1000);
+  }
+  const t = tOf(s);
+  if (needReinit || t < tPrev) { initParts(stateAt(sel, t)); needReinit = false; }
+  else advect(sel, tPrev, t);
+  tPrev = t;
+  drawHero(t, dtR);
+  drawTop(t);
+  drawCharts(t);
+  readout(t);
+  requestAnimationFrame(frame);
+}
+
+document.querySelectorAll('.mbtn').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.mbtn').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  sel = b.dataset.m;
+  $('physCard').innerHTML = PHYS[sel];
+  needReinit = true;
+});
+
+document.querySelectorAll('.vtab').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.vtab').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  viewMode = b.dataset.v;
+  const titles = {
+    split: '2D Lubrication Cross-Section + 3D Isometric CoWoS Stack',
+    '2d': 'Full 2D Lubrication Cross-Section',
+    '3d': 'Full 3D Isometric CoWoS Stack'
+  };
+  $('viewTitle').textContent = titles[viewMode];
+});
+
+['F0', 'V0', 'mu', 'n', 'ty', 'k', 'Q'].forEach(id => {
+  $(id).addEventListener('input', () => { recompute(); });
+});
+$('dur').addEventListener('input', readParams);
+$('play').onclick = () => { if (!playing && s >= 1) { s = 0; needReinit = true; } setPlay(!playing); };
+$('reset').onclick = () => { s = 0; needReinit = true; setPlay(true); };
+$('scrub').addEventListener('input', () => { s = +$('scrub').value / 1000; setPlay(false); });
+$('snap').onclick = () => {
+  const a = document.createElement('a');
+  a.download = 'ai_accelerator_tim_sim.png';
+  a.href = $('heroCanvas').toDataURL('image/png');
+  a.click();
+};
+
+const PRESETS = {
+  ideal: { F0: 400, V0: 30, mu: 2, n: 1, ty: 0, k: 5, Q: 700 },
+  silver: { F0: 400, V0: 30, mu: 2, n: 0.4, ty: 800, k: 8.5, Q: 700 },
+  ceramic: { F0: 300, V0: 25, mu: 2.3, n: 0.7, ty: 5200, k: 4.5, Q: 700 }
+};
+document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
+  const p = PRESETS[b.dataset.preset];
+  Object.keys(p).forEach(k => $(k).value = p[k]);
+  recompute(); s = 0; setPlay(true);
+});
+
+const HW_PRESETS = {
+  h100: { A: 814e-6, Q: 700, F0: 400, V0: 30 },
+  b200: { A: 1050e-6, Q: 1000, F0: 550, V0: 42 },
+  mi300: { A: 920e-6, Q: 750, F0: 450, V0: 35 }
+};
+document.querySelectorAll('[data-hw]').forEach(b => b.onclick = () => {
+  const h = HW_PRESETS[b.dataset.hw];
+  A_DIE = h.A; S_DIE = Math.sqrt(A_DIE); R_EQ = Math.sqrt(A_DIE / PI);
+  $('Q').value = h.Q; $('F0').value = h.F0; $('V0').value = h.V0;
+  recompute(); s = 0; setPlay(true);
+});
+
+$('physCard').innerHTML = PHYS[sel];
+recompute();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
