@@ -3,7 +3,7 @@
 
 This is to declare our AI usage \- where we used AI tools and how we have done so. We have attached our AI chats separately.
 
-I, **Pranav Yadavalli (MS25BTECH11029)**, declare that I have used AI in a significant portion of the work. I have used **Claude**, **Gemini** and **ElevenLabsAI** for my work (all in their free tier).  
+I, **Pranav Yadavalli (MS25BTECH11029)**, declare that I have used AI in my portion of the work. I have used **Claude**, **Gemini** and **ElevenLabsAI** for my work (all in their free tier).  
 Claude Sonnet 5.5 Low was used to formulate the constitutive prompt describing **my idea** of the Newtonian paste Simulator which was fed back into Claude Sonnet 5.5 High along with references of Prof. Saswata’s notes to generate the interactive HTML. Once the model was made and refined, a report in a story form which bridged the theory to the exact equations of Stefan’s law which is implemented in the simulator.  
 Gemini was used to learn the basics of Git to upload and commit all the code and files which comprise our submission.  
 Finally, ElevenLabsAI was used to transcribe the explanation video sections and converted into the [TRANSCRIPT.md](http://TRANSCRIPT.md) in the GitHub repository.
