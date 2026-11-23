@@ -15,7 +15,101 @@ Now, uh, moving on to, like, what, uh, brings in... So what else, what else we m
 constant wa- would, uh, would be where, uh, we are analyzing under a constant volume, uh, and we are verifying it over, uh, various theorems such as Reynolds theorem. And we are also verifying that the lubrication of the creeping flow assumptions hold via the dimensionless groups, such as the aspect ratio and the Reynolds number. And we're coupling it with the resulting gap, which varies over time, which was the bond line thickness as well as the, uh, radius of coverage. And we're also integrating the Fourier heat conduction to quantify the exact, uh, temperature change in the 700-watt GPU.
 
 ### Section 1
+00:00:00,520 --> 00:00:04,400 [Yaswitha]
+Let's talk about the physical picture of the squeeze flow of thermal paste. 
 
+00:00:06,040 --> 00:00:21,500 [Yaswitha]
+What's actually happening physically inside a computer? Heat is generated in the silicon die. From there, it has to travel through a thin layer of thermal paste, pass into the metal lid or cold plate, spread out through a heat sink, and finally escape into the moving air. 
+
+00:00:23,220 --> 00:00:28,200 [Yaswitha]
+Now, the easiest way to, to think about this path is like a chain of resistors in series. 
+
+00:00:29,300 --> 00:00:37,800 [Yaswitha]
+Each layer puts up a little bit of resistance to the heat, which means all of those individual temperature drops simply add up. 
+
+00:00:40,820 --> 00:00:54,240 [Yaswitha]
+The thermal paste is the odd one out. Even though it's 10 to 100 times thinner than all the other layers, it's a terrible conductor by comparison. It only conducts about 5 watt per meter kelvin, 
+
+00:00:55,820 --> 00:01:01,560 [Yaswitha]
+whereas the copper sitting right next to it conducts roughly 400 watt per meter kelvin. 
+
+00:01:02,960 --> 00:01:12,580 [Yaswitha]
+Because of that huge gap in conductivity, thickness immediately turns into thermal resistance. On a standard 20 by 20 millimeter die, 
+
+00:01:14,240 --> 00:01:20,440 [Yaswitha]
+every extra 20 micrometers of paste costs about 100th of a kelvin per watt. 
+
+00:01:22,760 --> 00:01:26,300 [Yaswitha]
+At 100 watt, that is 1 kelvin 
+
+00:01:27,600 --> 00:01:29,720 [Yaswitha]
+ at 20 micrometers 
+
+00:01:30,900 --> 00:01:47,380 [Yaswitha]
+and 10 kelvin at 200 micrometers. For our hardware benchmark, rather than choosing any arbitrary benchmark, we choose the H100 class GPU of 700 watts on an 814 square millimeter square die, 
+
+00:01:49,520 --> 00:02:10,360 [Yaswitha]
+and the heat flux is 86 watts per second, watts per centimeter square.  At that level of intensity, there is zero margin for error, so every single micrometer matters. So how do we actually predict how thin we can squeeze this paste? 
+
+00:02:11,460 --> 00:02:14,880 [Yaswitha]
+So to answer that, we need a small analytical toolkit .
+
+00:02:16,500 --> 00:02:22,000 [Yaswitha]
+The first is the dimensions. Everything in physics is built out of mass, length, and time. 
+
+00:02:23,220 --> 00:02:32,780 [Yaswitha]
+Making a habit of, like, checking that every term in an equation shares the same dimensions is the fastest way to catch any algebra slips. 
+
+00:02:35,680 --> 00:02:54,960 [Yaswitha]
+Second, the force scales. When a fluid moves, two main forces are competing. One is inertia, the fluid's tendency to keep moving, scales as rho U square L square. Meanwhile, viscous drag, the fluid's internal friction, scales as mu UL. 
+
+00:02:57,700 --> 00:03:13,120 [Yaswitha]
+And the ratio of this inertia scale and the viscous scale is the Reynolds number. It can be read as a ratio of two times, like how long viscosity takes to spread momentum across the layer divided by how long the flow takes to carry fluid across it. 
+
+00:03:14,740 --> 00:03:28,920 [Yaswitha]
+Applying that directly to our squeeze film, here the length scale that really controls viscous friction is the tiny gap height, which is h. So our squeeze film Reynolds number becomes 
+
+00:03:30,440 --> 00:03:32,000 [Yaswitha]
+rho WH by mu. 
+
+00:03:34,960 --> 00:03:53,800 [Yaswitha]
+With a density of 2,500 kilograms per cubic meter, a slow squeeze speed of 10 micrometers per second, a gap of 50 micrometers, and a thick viscosity of 100 Pascal-second, we roughly get the Reynolds number as 10 to the power minus 11. 
+
+00:03:56,720 --> 00:03:59,480 [Yaswitha]
+Since the Reynolds number is so tiny, 
+
+00:04:00,560 --> 00:04:11,720 [Yaswitha]
+it tells us that inertia is completely irrelevant here. There is no splashing, no turbulence. The paste  just creeps outward like cold honey in slow motion. 
+
+00:04:13,400 --> 00:04:27,640 [Yaswitha]
+That brings us to our third tool, the control volume and the Reynolds transport theorem. Like, imagine slicing out an imaginary cylindrical column of paste of radius R and height as a function of time. 
+
+00:04:29,240 --> 00:04:58,320 [Yaswitha]
+As the top plate presses down at speed W, the column gets squeezed and loses volume at a rate of pi R square W. Since the paste has constant density, it can't just compress and vanish. All of the displaced volume has to escape sideways through the outer rim of the cylinder. Dividing by the circumference gives us the radial volume flux per unit circumference, Q is equal to RW by 2. 
+
+00:04:59,700 --> 00:05:04,940 [Yaswitha]
+Or if you write it in general Cartesian form, it's simply grad dot Q is equal to U, 
+
+00:05:06,320 --> 00:05:10,640 [Yaswitha]
+and it holds identically for every paste rheology. 
+
+00:05:12,780 --> 00:06:00,020 [Yaswitha]
+Coming to the thin gap simplification, this is where the shape of the gap gives us a huge mathematical break. The, the thinness ratio, the epsilon, the gap height divided by the plate radius is tiny, that is around 10 to the power minus 3. So when we compare every term in the full momentum equation using that small number, things simplify dramatically. Because the paste is squeezed through such a narrow slit, the sideways radial speed ends up much larger than the downward plate speed, specifically by a factor of 1 by epsilon. That also means the shearing of the fluid is completely dominated by how fast the radial velocity changes vertically across the gap. 
+
+00:06:02,480 --> 00:06:10,300 [Yaswitha]
+As a result, both inertia and the horizontal viscous terms just drop right out. Even better, pressure doesn't have 
+
+00:06:12,260 --> 00:06:17,700 [Yaswitha]
+to vary across such a thin gap, so pressure only depends on the radial position R. 
+
+00:06:18,940 --> 00:06:28,860 [Yaswitha]
+So everything collapses down to a clean local slit flow balance, that is 0 is equal to minus DP by DR plus dou TRZ by dou Z. 
+
+00:06:30,800 --> 00:06:47,320 [Yaswitha]
+Integrating across the gap with symmetry about the mid-plane gives a result we will reuse for all three pastes. The shear stress is linear across the gap, tau equals minus G times zeta, where G is the radial pressure gradient. 
+
+00:06:49,540 --> 00:07:07,540 [Yaswitha]
+And we haven't even picked a specific material yet. No viscosity model, no yield stress, and, uh, still we already know the exact shape of the stress field. Conservation laws alone handed us both the continuity flux and this linear stress profile.
 
 ### Section 2
 00:00:01,420 --> 00:01:16,120 [Pranav]
@@ -297,6 +391,8 @@ Newtons. So either formulate with dispersants to keep tau y below about 500 pasc
 
 00:13:43,968 --> 00:14:20,588 [Yaswitha]
 And the Newtonian lab supports the same lesson, like coverage and gap, not just conductivity, set the temperature drop. The thermal resistance of the bond line follows the same ordering, about 0.0062 Kelvin per watt for the shear thinning paste and 0.006 Kelvin per watt for the Newtonian, and about 0.008 for shear thickening and 0.00024 for the stalled Bingham paste, like almost 10 times worse than the shear thinning case.
+
+### Section 6
 
 ### Section 7
 00:00:00,480 --> 00:00:23,040 [Avanika]
