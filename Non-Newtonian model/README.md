@@ -1,6 +1,7 @@
 # Squeeze Flow of Non-Newtonian Thermal Interface Materials (TIM) in 700 W AI GPU Packaging
 
 ### *First-Principles Transport Phenomena: From Reynolds Transport Theorem & Cauchy Momentum to Rheological Closure and Chip Thermal Bottlenecks*
+> **Author & Primary Contributor:** Avanika S (https://github.com/Avani-wai) — *Non-Newtonian Rheology Modeling, Analytical Derivations, Verification Suite & Visualization Pipeline*
 
 ![700 W AI GPU Thermal-Paste Squeeze Flow Animation](figures/gpu_spread.gif)
 
