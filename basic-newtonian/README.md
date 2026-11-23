@@ -1,5 +1,5 @@
 # The Squeeze
-
+> **Author & Primary Contributor:** Pranav Y (https://github.com/irrati0n4l) — *Non-Newtonian Rheology Modeling, Analytical Derivations, Verification Suite & Visualization Pipeline*
 *From a throttling processor to a film of paste: a journey through force, flow and heat, rebuilt from the basics of the course*
 
 > Markdown reconstruction of the original PDF. Text is extracted page-wise; original embedded visual assets are included where extractable.
